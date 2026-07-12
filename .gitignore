@@ -1,0 +1,15 @@
+node_modules/
+dist/
+data/
+*.db
+*.db-shm
+*.db-wal
+
+# Secrets & lokale Config
+.env
+.env.local
+config/platforms.yaml
+
+# Logs / OS
+*.log
+.DS_Store

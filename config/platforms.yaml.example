@@ -1,0 +1,51 @@
+# social-to-chat — Beispiel-Konfiguration
+# Kopieren nach config/platforms.yaml und anpassen.
+#
+# SECRETS GEHÖREN HIER NICHT REIN. Tokens/URLs als ${ENV_NAME}-Platzhalter
+# referenzieren; die Werte kommen aus Umgebungsvariablen (.env / Container-Env).
+# Das Repo ist Open Source.
+
+# Poll-Intervall (croner-Syntax). Default: alle 5 Minuten.
+schedule: "*/5 * * * *"
+
+# Ziel-Webhook. Besser via ENV WEBHOOK_URL setzen (hat Vorrang vor diesem Wert).
+# Bei Raptus: Trigger-URL der Logic App `social-feed` (rendert die Teams-Karte).
+webhookUrl: "${WEBHOOK_URL}"
+
+# SQLite-Datei für Deduplizierung / State.
+dbPath: "./data/social-to-chat.db"
+
+platforms:
+  - key: raptus-linkedin
+    platform: linkedin
+    name: "Raptus AG (LinkedIn)"
+    enabled: true
+    options:
+      organizationUrn: "urn:li:organization:XXXXXXXX"
+      tokenEnv: "LINKEDIN_ACCESS_TOKEN"
+
+  - key: raptus-facebook
+    platform: facebook
+    name: "Raptus AG (Facebook)"
+    enabled: false
+    options:
+      pageId: "XXXXXXXXXXXX"
+      tokenEnv: "FACEBOOK_PAGE_TOKEN"
+
+  - key: raptus-instagram
+    platform: instagram
+    name: "Raptus AG (Instagram)"
+    enabled: false
+    options:
+      # Voraussetzung: IG-Business-Konto, mit der FB-Page verknüpft.
+      igUserId: "XXXXXXXXXXXX"
+      tokenEnv: "INSTAGRAM_ACCESS_TOKEN"
+
+  - key: raptus-tiktok
+    platform: tiktok
+    name: "Raptus AG (TikTok)"
+    enabled: false
+    options:
+      # Achtung: Kommentare sind über TikTok nicht lesbar (nur Posts + Stats).
+      openId: "XXXXXXXX"
+      tokenEnv: "TIKTOK_ACCESS_TOKEN"

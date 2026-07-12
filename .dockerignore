@@ -1,0 +1,8 @@
+node_modules/
+dist/
+data/
+.git/
+.env
+.env.*
+config/platforms.yaml
+*.log

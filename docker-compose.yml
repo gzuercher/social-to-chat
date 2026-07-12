@@ -1,0 +1,29 @@
+services:
+  social-poller:
+    build: .
+    image: ghcr.io/raptus-ag/social-to-chat:latest
+    container_name: social-to-chat
+    restart: unless-stopped
+    environment:
+      # Ziel-Webhook (social-feed Logic App). Pflicht.
+      WEBHOOK_URL: ${WEBHOOK_URL:?WEBHOOK_URL must be set in .env or stack environment}
+      # Plattform-Tokens (nur die aktiv genutzten setzen).
+      LINKEDIN_ACCESS_TOKEN: ${LINKEDIN_ACCESS_TOKEN:-}
+      FACEBOOK_PAGE_TOKEN: ${FACEBOOK_PAGE_TOKEN:-}
+      INSTAGRAM_ACCESS_TOKEN: ${INSTAGRAM_ACCESS_TOKEN:-}
+      TIKTOK_ACCESS_TOKEN: ${TIKTOK_ACCESS_TOKEN:-}
+      CONFIG_PATH: /app/config/platforms.yaml
+      DB_PATH: /data/social-to-chat.db
+      # LOG_LEVEL: info
+    volumes:
+      # State/Dedup-DB. platforms.yaml wird ins Image gebacken; für lokale
+      # Anpassung stattdessen hier einhängen: ./config/platforms.yaml:/app/config/platforms.yaml:ro
+      - state:/data
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "5"
+
+volumes:
+  state:

@@ -9,9 +9,10 @@ Kein Drittanbieter-SaaS (kein MAKE/n8n): ein kleiner TypeScript/Node-Container,
 den man selbst betreibt. Schwester-Projekt von
 [status-page-to-chat](https://github.com/raptus-ag/status-page-to-chat).
 
-> **Status:** Grundgerüst. Das Datenmodell, der Poll-Loop, Deduplizierung und
-> der Webhook-Versand stehen; die Plattform-Adapter sind Stubs mit dokumentierten
-> API-Endpunkten und `TODO`s. Siehe [Roadmap](#roadmap).
+> **Status:** Gehärtetes Grundgerüst. Datenmodell, Poll-Loop, Deduplizierung,
+> Webhook-Versand, Selbstüberwachung (Health-/Token-Ops-Events in den Chat),
+> stiller Erstlauf und Docker-HEALTHCHECK stehen; die Plattform-Adapter sind
+> Stubs mit dokumentierten API-Endpunkten und `TODO`s. Siehe [Roadmap](#roadmap).
 
 ## Prioritäten
 
@@ -58,6 +59,30 @@ Der Poller POSTet je Ereignis dieses JSON an `WEBHOOK_URL` (identisch zum
 `platform`/`type` steuern auf der Empfängerseite Icon, Farbe und Texte — der
 Poller liefert nur normalisierte Rohdaten.
 
+### Ops-Events (Selbstüberwachung)
+
+Betriebsmeldungen des Pollers gehen als Contract-Erweiterung mit `type: "ops"`
+an denselben Webhook — der Chat-Kanal ist zugleich der Alarmkanal:
+
+```json
+{
+  "schemaVersion": 1,
+  "source": "social",
+  "type": "ops",
+  "kind": "tokenExpiry",
+  "platform": "linkedin",
+  "provider": "raptus-linkedin",
+  "providerName": "Raptus AG (LinkedIn)",
+  "daysLeft": 7,
+  "message": "Das API-Token für Raptus AG (LinkedIn) läuft in 7 Tagen ab (2026-09-01). Bitte rechtzeitig erneuern.",
+  "timestamp": "2026-07-13T09:00:00Z"
+}
+```
+
+`kind` ∈ `down` | `recovered` | `halfDead` | `tokenExpiry`; bei `down` kommt
+`errorCategory` (z. B. `"Authentication failed"`), bei Dauer-bezogenen Meldungen
+`durationLabel` (z. B. `"2h 15min"`) mit. Details: [ARCHITECTURE](docs/ARCHITECTURE.md).
+
 ## Schnellstart (Entwicklung)
 
 ```bash
@@ -77,6 +102,18 @@ docker compose up -d
 Secrets kommen ausschließlich aus Umgebungsvariablen; die YAML enthält nur
 `${ENV_NAME}`-Platzhalter. **Keine Tokens committen.**
 
+Nützliche Subcommands (auch im Container):
+
+```bash
+node dist/src/main.js validate   # Config prüfen (Exit 0/1)
+node dist/src/main.js health     # HEALTHCHECK: letzter Lauf < 15 min?
+```
+
+Der Docker-`HEALTHCHECK` nutzt `health` automatisch; beim allerersten Lauf pro
+Plattform wird der Bestand **still eingelesen** (kein Post-Flood im Kanal).
+Token-Abläufe (`tokenExpiresAt` in der YAML) und anhaltende Adapter-Ausfälle
+meldet der Poller selbst als Karte in den Chat.
+
 ## Konfiguration
 
 - `config/platforms.yaml` – welche Seiten, wie oft (nicht-geheim). Beispiel:
@@ -85,10 +122,16 @@ Secrets kommen ausschließlich aus Umgebungsvariablen; die YAML enthält nur
 
 ## Roadmap
 
+- [x] Betriebs-Härtung: Selbstüberwachung (Ops-Events), Token-Watchdog,
+      stiller Erstlauf, HEALTHCHECK, Retry/Backoff (Familienstandard mit
+      status-page-to-chat)
+- [ ] `type: "ops"`-Rendering in der social-feed Logic App (msteams-feeds-automate)
 - [ ] LinkedIn-Adapter: Posts → Kommentare → Stats
 - [ ] Facebook-Adapter: Posts → Kommentare → Stats
 - [ ] Instagram-Adapter (setzt verknüpftes IG-Business-Konto voraus)
 - [ ] TikTok-Adapter: Posts + Stats (keine Kommentare)
+- [ ] LinkedIn-Token-Auto-Refresh (Ausbaustufe 2 des Token-Watchdogs)
+- [ ] Stats-Contract designen (Priorität 3, mit msteams-feeds-automate)
 - [ ] Digest / periodische Zusammenfassung
 - [ ] GHCR-Image-Publish-Workflow (analog status-page-to-chat)
 

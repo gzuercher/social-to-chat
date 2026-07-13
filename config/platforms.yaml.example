@@ -20,6 +20,9 @@ platforms:
     platform: linkedin
     name: "Raptus AG (LinkedIn)"
     enabled: true
+    # Ablaufdatum des Tokens (ISO-Datum). Der Poller warnt bei T-14/T-7/T-1
+    # Tagen per Ops-Karte im Chat. Nach jedem Token-Erneuern hier nachführen.
+    tokenExpiresAt: "2026-09-01"
     options:
       organizationUrn: "urn:li:organization:XXXXXXXX"
       tokenEnv: "LINKEDIN_ACCESS_TOKEN"

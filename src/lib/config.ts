@@ -8,16 +8,26 @@ import { z } from "zod";
  *
  * Secrets NIE in die YAML schreiben — das Repo ist Open Source. In der YAML
  * stehen `${ENV_NAME}`-Platzhalter, die hier aus process.env aufgelöst werden.
+ *
+ * Vorrang-Reihenfolge für betriebliche Werte: ENV > YAML > Default.
+ *   WEBHOOK_URL   → webhookUrl
+ *   STATE_DB_PATH → dbPath   (Name gespiegelt mit status-page-to-chat)
  */
 
 const platformSchema = z.object({
   /** Eindeutiger Key, auch für die Deduplizierung/State genutzt. */
   key: z.string().min(1),
   platform: z.enum(["linkedin", "facebook", "instagram", "tiktok"]),
-  /** Menschlicher Name der Seite/Organisation (fürs Log). */
+  /** Menschlicher Name der Seite/Organisation (fürs Log und für Ops-Karten). */
   name: z.string().default(""),
   /** Ob dieser Adapter aktiv gepollt wird. */
   enabled: z.boolean().default(true),
+  /**
+   * Ablaufdatum des Plattform-Tokens (ISO-Datum, z. B. "2026-09-01").
+   * Der Token-Watchdog warnt bei T-14/T-7/T-1 Tagen per Ops-Event in den
+   * Chat. Weglassen = keine Ablauf-Warnung (401-Erkennung greift trotzdem).
+   */
+  tokenExpiresAt: z.iso.date().optional(),
   /** Adapter-spezifische Felder (Org-ID, Page-ID, Token-ENV-Name …). */
   options: z.record(z.string(), z.unknown()).default({}),
 });
@@ -26,8 +36,8 @@ const configSchema = z.object({
   /** Cron-Ausdruck fürs Polling (croner-Syntax). Default: alle 5 Minuten. */
   schedule: z.string().default("*/5 * * * *"),
   /** Ziel-Webhook (social-feed Logic App). Aus ENV WEBHOOK_URL, nicht aus YAML. */
-  webhookUrl: z.string().url(),
-  /** Pfad zur SQLite-Datei für State/Dedup. */
+  webhookUrl: z.url(),
+  /** Pfad zur SQLite-Datei für State/Dedup. ENV STATE_DB_PATH hat Vorrang. */
   dbPath: z.string().default("./data/social-to-chat.db"),
   platforms: z.array(platformSchema).default([]),
 });
@@ -52,10 +62,13 @@ function resolveEnv(value: unknown): unknown {
 }
 
 export function loadConfig(path = process.env.CONFIG_PATH ?? "./config/platforms.yaml"): Config {
-  const raw = resolveEnv(parseYaml(readFileSync(path, "utf8")) ?? {});
+  const raw = resolveEnv(parseYaml(readFileSync(path, "utf8")) ?? {}) as Record<string, unknown>;
   const merged = {
-    ...(raw as Record<string, unknown>),
-    webhookUrl: process.env.WEBHOOK_URL ?? (raw as Record<string, unknown>).webhookUrl,
+    ...raw,
+    webhookUrl: process.env.WEBHOOK_URL ?? raw.webhookUrl,
+    dbPath: process.env.STATE_DB_PATH ?? raw.dbPath,
   };
+  // undefined-Werte entfernen, damit zod-Defaults greifen.
+  if (merged.dbPath === undefined) delete (merged as { dbPath?: unknown }).dbPath;
   return configSchema.parse(merged);
 }

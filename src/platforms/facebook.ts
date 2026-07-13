@@ -1,6 +1,6 @@
 import type { PlatformConfig } from "../lib/config.js";
 import type { Logger } from "../lib/logger.js";
-import type { SocialEvent, SocialProvider, SocialStats } from "./types.js";
+import type { PostRef, SocialEvent, SocialProvider, SocialStats } from "./types.js";
 
 /**
  * Facebook-Page-Adapter.
@@ -31,15 +31,17 @@ export class FacebookProvider implements SocialProvider {
     this.key = cfg.key;
   }
 
-  async fetchNewPosts(): Promise<SocialEvent[]> {
-    // TODO(Priorität 1): published_posts abrufen, neue in SocialEvent (type "post") mappen.
-    this.log.warn("Facebook fetchNewPosts: noch nicht implementiert");
+  async fetchPosts(): Promise<SocialEvent[]> {
+    // TODO(Priorität 1): published_posts im Sichtfenster abrufen und in
+    // SocialEvent (type "post") mappen — ungefiltert, Dedup macht der Loop.
+    this.log.warn("Facebook fetchPosts: noch nicht implementiert");
     return [];
   }
 
-  async fetchNewComments(): Promise<SocialEvent[]> {
-    // TODO(Priorität 2): comments je Post abrufen, neue in SocialEvent (type "comment") mappen.
-    this.log.warn("Facebook fetchNewComments: noch nicht implementiert");
+  async fetchComments(_posts: PostRef[]): Promise<SocialEvent[]> {
+    // TODO(Priorität 2): comments je übergebenem Post abrufen und in
+    // SocialEvent (type "comment") mappen.
+    this.log.warn("Facebook fetchComments: noch nicht implementiert");
     return [];
   }
 

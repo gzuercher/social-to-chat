@@ -13,7 +13,7 @@ services:
       INSTAGRAM_ACCESS_TOKEN: ${INSTAGRAM_ACCESS_TOKEN:-}
       TIKTOK_ACCESS_TOKEN: ${TIKTOK_ACCESS_TOKEN:-}
       CONFIG_PATH: /app/config/platforms.yaml
-      DB_PATH: /data/social-to-chat.db
+      STATE_DB_PATH: /data/social-to-chat.db
       # LOG_LEVEL: info
     volumes:
       # State/Dedup-DB. platforms.yaml wird ins Image gebacken; für lokale

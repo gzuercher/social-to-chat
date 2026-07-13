@@ -1,80 +1,100 @@
 import { Cron } from "croner";
 import { loadConfig } from "./lib/config.js";
 import { logger } from "./lib/logger.js";
+import { HealthTracker } from "./lib/healthTracker.js";
 import { Store } from "./state/store.js";
 import { WebhookNotifier } from "./notify/webhook.js";
-import { createProvider } from "./platforms/index.js";
-import type { SocialEvent, SocialProvider } from "./platforms/types.js";
+import { runOnce } from "./poller.js";
+import { runHealthcheck } from "./cli/health.js";
+import { runValidate } from "./cli/validate.js";
 
 /**
- * Ein Poll-Durchlauf für einen Provider. Reihenfolge = Prioritäten:
- * erst neue Posts, dann neue Kommentare. (Statistiken folgen später als
- * eigener, seltenerer Job — hier noch nicht verdrahtet.)
- * Dedup: nur Events, die der Store noch nicht gesehen hat, werden verschickt.
+ * Container-Entrypoint (Muster gespiegelt von status-page-to-chat):
+ * Config laden, sofort einen Lauf starten (Logs zeigen schnell Aktivität),
+ * dann nach Zeitplan. Läufe überlappen nie (croner protect + isRunning-
+ * Guard), SIGTERM/SIGINT warten auf den laufenden Zyklus (Drain).
+ * Die eigentliche Poll-Logik lebt testbar in poller.ts.
  */
-async function pollProvider(
-  provider: SocialProvider,
-  store: Store,
-  notifier: WebhookNotifier,
-): Promise<void> {
-  const log = logger.child({ provider: provider.key });
-  const events: SocialEvent[] = [
-    ...(await provider.fetchNewPosts()),
-    ...(await provider.fetchNewComments()),
-  ];
-
-  for (const event of events) {
-    if (store.hasSeen(provider.key, event.externalId)) continue;
-    try {
-      await notifier.send(event);
-      store.markSeen(provider.key, event.externalId, event.type, new Date().toISOString());
-    } catch (err) {
-      // Nicht als gesehen markieren → nächster Durchlauf versucht es erneut.
-      log.error({ err, externalId: event.externalId }, "Senden fehlgeschlagen");
-    }
-  }
-}
-
-async function runOnce(
-  providers: SocialProvider[],
-  store: Store,
-  notifier: WebhookNotifier,
-): Promise<void> {
-  for (const provider of providers) {
-    try {
-      await pollProvider(provider, store, notifier);
-    } catch (err) {
-      logger.error({ err, provider: provider.key }, "Provider-Durchlauf fehlgeschlagen");
-    }
-  }
-}
-
-function main(): void {
+async function main(): Promise<void> {
   const config = loadConfig();
   const store = new Store(config.dbPath);
   const notifier = new WebhookNotifier(config.webhookUrl, logger);
-  const providers = config.platforms.filter((p) => p.enabled).map((p) => createProvider(p, logger));
+  const healthTracker = new HealthTracker();
 
-  logger.info(
-    { schedule: config.schedule, providers: providers.map((p) => p.key) },
-    "social-to-chat gestartet",
-  );
+  let currentPlatforms = config.platforms;
+  let isRunning = false;
+  let shuttingDown = false;
 
-  if (providers.length === 0) {
+  if (currentPlatforms.filter((p) => p.enabled).length === 0) {
     logger.warn("Keine aktiven Plattformen konfiguriert — nichts zu tun.");
   }
 
-  // Sofort einmal laufen, dann nach Zeitplan.
-  void runOnce(providers, store, notifier);
-  new Cron(config.schedule, () => void runOnce(providers, store, notifier));
-
-  const shutdown = (): void => {
-    logger.info("shutdown");
-    store.close();
-    process.exit(0);
+  const tick = async (): Promise<void> => {
+    if (shuttingDown || isRunning) return;
+    isRunning = true;
+    try {
+      // Config vor jedem Zyklus neu einlesen, damit Änderungen an der
+      // Plattform-Liste ohne Neustart greifen. Bei kaputter Datei läuft
+      // der letzte gute Stand weiter.
+      try {
+        currentPlatforms = loadConfig().platforms;
+      } catch (err) {
+        logger.warn({ err }, "Config-Reload fehlgeschlagen, nutze letzten guten Stand");
+      }
+      await runOnce(currentPlatforms, { store, notifier, healthTracker });
+    } finally {
+      isRunning = false;
+    }
   };
-  process.on("SIGINT", shutdown);
-  process.on("SIGTERM", shutdown);
+
+  const job = new Cron(config.schedule, { protect: true }, () => void tick());
+  logger.info(
+    {
+      schedule: config.schedule,
+      nextRun: job.nextRun()?.toISOString() ?? null,
+      providers: currentPlatforms.filter((p) => p.enabled).map((p) => p.key),
+    },
+    "social-to-chat gestartet",
+  );
+
+  await tick();
+
+  const shutdown = (signal: string): void => {
+    if (shuttingDown) return;
+    shuttingDown = true;
+    logger.info({ signal }, "Shutdown-Signal empfangen, stoppe Scheduler");
+    job.stop();
+
+    const waitForRun = (): void => {
+      if (!isRunning) {
+        store.close();
+        logger.info("Shutdown abgeschlossen");
+        process.exit(0);
+      } else {
+        setTimeout(waitForRun, 200);
+      }
+    };
+    waitForRun();
+  };
+  process.on("SIGINT", () => shutdown("SIGINT"));
+  process.on("SIGTERM", () => shutdown("SIGTERM"));
 }
 
-main();
+const subcommand = process.argv[2];
+
+if (subcommand === "validate") {
+  runValidate();
+} else if (subcommand === "health") {
+  runHealthcheck();
+} else if (subcommand === undefined || subcommand === "poll") {
+  main().catch((err: unknown) => {
+    logger.fatal({ err }, "Poller konnte nicht starten");
+    process.exit(1);
+  });
+} else {
+  process.stderr.write(
+    `Unbekannter Subcommand: ${subcommand}\n` +
+      `Usage: node dist/src/main.js [poll|validate|health]\n`,
+  );
+  process.exit(2);
+}

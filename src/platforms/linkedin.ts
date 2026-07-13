@@ -1,6 +1,6 @@
 import type { PlatformConfig } from "../lib/config.js";
 import type { Logger } from "../lib/logger.js";
-import type { SocialEvent, SocialProvider, SocialStats } from "./types.js";
+import type { PostRef, SocialEvent, SocialProvider, SocialStats } from "./types.js";
 
 /**
  * LinkedIn-Adapter (Organisation/Company Page).
@@ -30,17 +30,18 @@ export class LinkedInProvider implements SocialProvider {
     this.key = cfg.key;
   }
 
-  async fetchNewPosts(): Promise<SocialEvent[]> {
-    // TODO(Priorität 1): Posts der Organisation abrufen, seit letztem Lauf filtern,
-    // in SocialEvent (type "post") mappen. Token aus process.env[options.tokenEnv].
-    this.log.warn("LinkedIn fetchNewPosts: noch nicht implementiert");
+  async fetchPosts(): Promise<SocialEvent[]> {
+    // TODO(Priorität 1): Posts der Organisation im Sichtfenster abrufen und in
+    // SocialEvent (type "post") mappen — ungefiltert, Dedup macht der Loop.
+    // Token aus process.env[options.tokenEnv].
+    this.log.warn("LinkedIn fetchPosts: noch nicht implementiert");
     return [];
   }
 
-  async fetchNewComments(): Promise<SocialEvent[]> {
-    // TODO(Priorität 2): socialActions/Kommentare je Post abrufen, in SocialEvent
-    // (type "comment", context = Auszug des Eltern-Posts) mappen.
-    this.log.warn("LinkedIn fetchNewComments: noch nicht implementiert");
+  async fetchComments(_posts: PostRef[]): Promise<SocialEvent[]> {
+    // TODO(Priorität 2): socialActions/Kommentare je übergebenem Post abrufen,
+    // in SocialEvent (type "comment", context = post.text-Auszug) mappen.
+    this.log.warn("LinkedIn fetchComments: noch nicht implementiert");
     return [];
   }
 

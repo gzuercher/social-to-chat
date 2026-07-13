@@ -40,9 +40,14 @@ COPY --chown=app:app config ./config
 USER app
 
 ENV NODE_ENV=production \
-    DB_PATH=/data/social-to-chat.db \
+    STATE_DB_PATH=/data/social-to-chat.db \
     CONFIG_PATH=/app/config/platforms.yaml
 
 VOLUME ["/data"]
+
+# Erkennt „Prozess lebt, aber Poll-Loop hängt": der health-Subcommand prüft,
+# dass der letzte Lauf (metadata.last_run_at) jünger als 15 min ist.
+HEALTHCHECK --interval=2m --timeout=15s --start-period=2m --retries=2 \
+  CMD ["node", "dist/src/main.js", "health"]
 
 CMD ["node", "dist/src/main.js"]

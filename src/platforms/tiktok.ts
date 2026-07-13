@@ -1,6 +1,6 @@
 import type { PlatformConfig } from "../lib/config.js";
 import type { Logger } from "../lib/logger.js";
-import type { SocialEvent, SocialProvider, SocialStats } from "./types.js";
+import type { PostRef, SocialEvent, SocialProvider, SocialStats } from "./types.js";
 
 /**
  * TikTok-Adapter.
@@ -30,13 +30,14 @@ export class TikTokProvider implements SocialProvider {
     this.key = cfg.key;
   }
 
-  async fetchNewPosts(): Promise<SocialEvent[]> {
-    // TODO(Priorität 1): video.list abrufen, neue in SocialEvent (type "post") mappen.
-    this.log.warn("TikTok fetchNewPosts: noch nicht implementiert");
+  async fetchPosts(): Promise<SocialEvent[]> {
+    // TODO(Priorität 1): video.list im Sichtfenster abrufen und in SocialEvent
+    // (type "post") mappen — ungefiltert, Dedup macht der Loop.
+    this.log.warn("TikTok fetchPosts: noch nicht implementiert");
     return [];
   }
 
-  async fetchNewComments(): Promise<SocialEvent[]> {
+  async fetchComments(_posts: PostRef[]): Promise<SocialEvent[]> {
     // Bewusst leer: TikTok hat keine Kommentar-Lese-API (siehe Datei-Header).
     return [];
   }

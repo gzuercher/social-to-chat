@@ -1,0 +1,16 @@
+{
+  "elements": [
+    {
+      "id": "urn:li:share:7001",
+      "commentary": "Wir stellen ein! Werde Teil des Raptus-Teams.",
+      "publishedAt": 1783900800000,
+      "createdAt": 1783900700000
+    },
+    {
+      "id": "urn:li:ugcPost:7002",
+      "commentary": "Neuer Blogpost: Sicher in die Cloud.",
+      "createdAt": 1783814400000
+    }
+  ],
+  "paging": { "count": 25, "start": 0 }
+}

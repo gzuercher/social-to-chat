@@ -1,0 +1,16 @@
+{
+  "data": [
+    {
+      "id": "111_222",
+      "message": "Sommerfest bei Raptus — danke an alle!",
+      "permalink_url": "https://www.facebook.com/111/posts/222",
+      "created_time": "2026-07-10T09:30:00+0000"
+    },
+    {
+      "id": "111_223",
+      "permalink_url": "https://www.facebook.com/111/posts/223",
+      "created_time": "2026-07-08T08:00:00+0000"
+    }
+  ],
+  "paging": {}
+}

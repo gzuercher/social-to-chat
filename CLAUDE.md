@@ -1,7 +1,8 @@
 # CLAUDE.md — Handoff & Kontext für social-to-chat
 
-Kurzkontext für Claude Code in künftigen Sessions. Das Betriebs-Fundament ist
-**fertig und getestet**; die Plattform-Adapter sind bewusst noch Stubs.
+Kurzkontext für Claude Code in künftigen Sessions. Betriebs-Fundament UND alle
+vier Adapter sind **implementiert und fixture-getestet** — die Adapter sind
+aber **noch nicht gegen die echten APIs verifiziert** (Tokens/IDs nötig).
 
 ## Was das ist
 Selbst gehosteter Poller (TypeScript/Node-Container), der die Social-Media-Seiten
@@ -35,8 +36,9 @@ Schwester-Projekt: `status-page-to-chat` (lokal: `/home/gzuercher/git-work/statu
 
 ## Architektur (IST)
 - `src/platforms/types.ts` — `SocialEvent`, `OpsEvent`, `PostRef`, `SocialProvider`, `Notifier`.
-- `src/platforms/{linkedin,facebook,instagram,tiktok}.ts` — **Stubs** mit dokumentierten
-  Endpunkten/Scopes (TikTok `fetchComments` = bewusst dauerhaft `[]`).
+- `src/platforms/{linkedin,facebook,instagram,tiktok}.ts` — implementierte Adapter
+  (fixture-getestet, Live-Verifikation offen; TikTok `fetchComments` = bewusst
+  dauerhaft `[]`). Options-Validierung per zod im Konstruktor.
 - `src/poller.ts` — testbarer Poll-Zyklus (Fetch → Post-Registry → Dedup → Versand →
   HealthTracker/Token-Ops → run_summary/last_run_at). Test-Hook: `providerFactory`.
 - `src/main.ts` — Entrypoint: croner `protect:true`, Config-Reload je Tick,
@@ -48,16 +50,24 @@ Schwester-Projekt: `status-page-to-chat` (lokal: `/home/gzuercher/git-work/statu
 - Docker: `HEALTHCHECK` via `main.js health` (prüft `last_run_at` < 15 min).
 
 ## Nächste Schritte
-1. `linkedin.ts` `fetchPosts()` — Token vorhanden (`r_organization_social`,
-   App „SoloPostics", Client `78s5jdboo592ss`; 60-Tage-Token → `tokenExpiresAt` pflegen!).
-2. dann `facebook.ts`, `instagram.ts` (IG-Business-Konto mit FB-Page verknüpfen!).
-3. `fetchComments()` je Plattform (TikTok überspringen).
-4. `type:"ops"`-Rendering in `msteams-feeds-automate` (Contract siehe README).
-5. Stats: erst Contract mit der Logic App designen, dann eigener seltener Job.
+1. **`type:"ops"`-Rendering in `msteams-feeds-automate`** (Contract siehe README) —
+   ohne diesen Zweig kommen Ops-Karten in der Logic App unbekannt an. Der
+   social-Contract dort ist die Quelle der Wahrheit; nach Änderungen beidseitig
+   abgleichen.
+2. **Live-Verifikation der Adapter** mit echten Tokens/IDs, in dieser Reihenfolge:
+   LinkedIn (Token vorhanden: `r_organization_social`, App „SoloPostics",
+   Client `78s5jdboo592ss`; 60-Tage-Token → `tokenExpiresAt` pflegen!), dann
+   Facebook, Instagram (IG-Business-Konto mit FB-Page verknüpfen!). Besonders
+   prüfen: Feldnamen der LinkedIn-Kommentare (defensiv gemappt, siehe
+   `linkedin.ts`-Header) und die Autor-URN-Darstellung.
+3. TikTok erst produktiv nehmen, wenn der Token-Refresh-Flow gebaut ist
+   (Access-Tokens nur 24 h gültig).
+4. Stats (P3): erst Contract mit der Logic App designen, dann eigener seltener Job.
 
-Beim Implementieren eines Adapters: `httpGet` aus `lib/httpClient.ts` nutzen
-(Timeout/Retry inklusive), Bestand im Sichtfenster liefern, Fehler werfen
-(nicht schlucken — der HealthTracker braucht sie), stabile `externalId` mappen.
+Adapter-Regeln (für Änderungen/neue Plattformen): `httpGet`/`httpPost` aus
+`lib/httpClient.ts` nutzen (Timeout/Retry inklusive), Bestand im Sichtfenster
+liefern, Fehler werfen (nicht schlucken — der HealthTracker braucht sie),
+stabile `externalId` mappen, options per zod im Konstruktor validieren.
 Der Loop übernimmt Dedup, Bootstrap und Versand automatisch.
 
 ## Konventionen

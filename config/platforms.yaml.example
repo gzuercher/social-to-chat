@@ -50,5 +50,6 @@ platforms:
     enabled: false
     options:
       # Achtung: Kommentare sind über TikTok nicht lesbar (nur Posts + Stats).
-      openId: "XXXXXXXX"
+      # Achtung 2: TikTok-Access-Tokens sind nur 24 h gültig — ohne
+      # Refresh-Flow (noch nicht gebaut) nicht produktiv aktivieren.
       tokenEnv: "TIKTOK_ACCESS_TOKEN"

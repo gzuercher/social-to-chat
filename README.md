@@ -9,10 +9,12 @@ Kein Drittanbieter-SaaS (kein MAKE/n8n): ein kleiner TypeScript/Node-Container,
 den man selbst betreibt. Schwester-Projekt von
 [status-page-to-chat](https://github.com/raptus-ag/status-page-to-chat).
 
-> **Status:** Gehärtetes Grundgerüst. Datenmodell, Poll-Loop, Deduplizierung,
-> Webhook-Versand, Selbstüberwachung (Health-/Token-Ops-Events in den Chat),
-> stiller Erstlauf und Docker-HEALTHCHECK stehen; die Plattform-Adapter sind
-> Stubs mit dokumentierten API-Endpunkten und `TODO`s. Siehe [Roadmap](#roadmap).
+> **Status:** Funktionsfähig, Live-Verifikation ausstehend. Poll-Loop,
+> Deduplizierung, Webhook-Versand, Selbstüberwachung (Health-/Token-Ops-Events
+> in den Chat), stiller Erstlauf und Docker-HEALTHCHECK stehen. Alle vier
+> Adapter sind implementiert (Posts; Kommentare für LinkedIn/FB/IG) und mit
+> Fixture-Tests abgedeckt — **aber noch nicht gegen die echten APIs getestet**
+> (Tokens/IDs nötig). Siehe [Roadmap](#roadmap).
 
 ## Prioritäten
 
@@ -125,12 +127,16 @@ meldet der Poller selbst als Karte in den Chat.
 - [x] Betriebs-Härtung: Selbstüberwachung (Ops-Events), Token-Watchdog,
       stiller Erstlauf, HEALTHCHECK, Retry/Backoff (Familienstandard mit
       status-page-to-chat)
-- [ ] `type: "ops"`-Rendering in der social-feed Logic App (msteams-feeds-automate)
-- [ ] LinkedIn-Adapter: Posts → Kommentare → Stats
-- [ ] Facebook-Adapter: Posts → Kommentare → Stats
-- [ ] Instagram-Adapter (setzt verknüpftes IG-Business-Konto voraus)
-- [ ] TikTok-Adapter: Posts + Stats (keine Kommentare)
-- [ ] LinkedIn-Token-Auto-Refresh (Ausbaustufe 2 des Token-Watchdogs)
+- [x] LinkedIn-Adapter: Posts + Kommentare (Fixture-Tests)
+- [x] Facebook-Adapter: Posts + Kommentare (Fixture-Tests)
+- [x] Instagram-Adapter: Posts + Kommentare (setzt verknüpftes IG-Business-Konto voraus)
+- [x] TikTok-Adapter: Posts (keine Kommentare — Plattform-Beschränkung)
+- [ ] **Live-Verifikation aller Adapter mit echten Tokens/IDs** (Feld-Mapping
+      bei LinkedIn-Kommentaren ist defensiv, siehe Datei-Header)
+- [ ] **`type: "ops"`-Rendering in der social-feed Logic App
+      (msteams-feeds-automate)** — bis dahin kommen Ops-Karten dort unbekannt an
+- [ ] LinkedIn-Token-Auto-Refresh (Ausbaustufe 2 des Token-Watchdogs);
+      TikTok braucht für Produktivbetrieb zwingend einen Refresh-Flow (24-h-Tokens)
 - [ ] Stats-Contract designen (Priorität 3, mit msteams-feeds-automate)
 - [ ] Digest / periodische Zusammenfassung
 - [ ] GHCR-Image-Publish-Workflow (analog status-page-to-chat)

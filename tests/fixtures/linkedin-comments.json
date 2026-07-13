@@ -1,0 +1,16 @@
+{
+  "elements": [
+    {
+      "commentUrn": "urn:li:comment:(urn:li:activity:7001,111)",
+      "actor": "urn:li:person:abc123",
+      "message": { "text": "Spannend! Gilt das auch für Teilzeit?" },
+      "createdAt": 1783905000000
+    },
+    {
+      "id": 222,
+      "actor": "urn:li:person:def456",
+      "message": { "text": "Gratuliere zum Wachstum!" },
+      "created": { "time": 1783906000000 }
+    }
+  ]
+}

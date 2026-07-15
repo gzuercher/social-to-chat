@@ -7,7 +7,7 @@ import type { Notifier, OpsEvent, SocialEvent } from "../platforms/types.js";
  * Webhook.
  *
  * Bei Raptus zeigt dieser Webhook auf die Logic App `social-feed`
- * (Repo msteams-feeds-automate), die daraus zentral die Teams-Adaptive-Card
+ * (Repo raptus-integration-router), die daraus zentral die Teams-Adaptive-Card
  * rendert. Der Body ist exakt der social-feed-Contract:
  *   • SocialEvent (type "post"/"comment") — `externalId` (nur intern für
  *     Dedup) wird vor dem Senden entfernt.

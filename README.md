@@ -42,7 +42,7 @@ Research API). Das ist eine Plattform-Beschränkung, kein Umsetzungsproblem —
 ## Contract
 
 Der Poller POSTet je Ereignis dieses JSON an `WEBHOOK_URL` (identisch zum
-`social-feed`-Contract im Repo `msteams-feeds-automate`):
+`social-feed`-Contract im Repo `raptus-integration-router`):
 
 ```json
 {
@@ -131,13 +131,13 @@ meldet der Poller selbst als Karte in den Chat.
 - [x] Facebook-Adapter: Posts + Kommentare (Fixture-Tests)
 - [x] Instagram-Adapter: Posts + Kommentare (setzt verknüpftes IG-Business-Konto voraus)
 - [x] TikTok-Adapter: Posts (keine Kommentare — Plattform-Beschränkung)
+- [x] `type: "ops"`-Rendering in der social-feed Logic App
+      (`raptus-integration-router`, seit 2026-07-15)
 - [ ] **Live-Verifikation aller Adapter mit echten Tokens/IDs** (Feld-Mapping
       bei LinkedIn-Kommentaren ist defensiv, siehe Datei-Header)
-- [ ] **`type: "ops"`-Rendering in der social-feed Logic App
-      (msteams-feeds-automate)** — bis dahin kommen Ops-Karten dort unbekannt an
 - [ ] LinkedIn-Token-Auto-Refresh (Ausbaustufe 2 des Token-Watchdogs);
       TikTok braucht für Produktivbetrieb zwingend einen Refresh-Flow (24-h-Tokens)
-- [ ] Stats-Contract designen (Priorität 3, mit msteams-feeds-automate)
+- [ ] Stats-Contract designen (Priorität 3, mit raptus-integration-router)
 - [ ] Digest / periodische Zusammenfassung
 - [ ] GHCR-Image-Publish-Workflow (analog status-page-to-chat)
 

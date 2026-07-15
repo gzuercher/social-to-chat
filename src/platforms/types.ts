@@ -4,7 +4,7 @@
  * Ein Plattform-Adapter liefert normalisierte {@link SocialEvent}s (Posts und
  * Kommentare) sowie optional {@link SocialStats}. Das Event-Format ist bewusst
  * identisch zum Contract, den die Teams-Renderer-Logic-App `social-feed`
- * (Repo msteams-feeds-automate) erwartet — der Notifier schickt es unverändert
+ * (Repo raptus-integration-router) erwartet — der Notifier schickt es unverändert
  * an einen konfigurierbaren Webhook.
  *
  * Architektur-Prinzip (Familienstandard mit status-page-to-chat):

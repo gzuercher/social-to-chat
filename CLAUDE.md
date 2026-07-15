@@ -8,7 +8,8 @@ aber **noch nicht gegen die echten APIs verifiziert** (Tokens/IDs nötig).
 Selbst gehosteter Poller (TypeScript/Node-Container), der die Social-Media-Seiten
 der Raptus AG beobachtet und **neue Posts / Kommentare / Statistiken** als JSON
 an einen konfigurierbaren Webhook schickt. Bei Raptus zeigt der Webhook auf die
-Logic App `social-feed` (Repo `msteams-feeds-automate`), die daraus zentral die
+Logic App `social-feed` (Repo `raptus-integration-router`, ehemals
+`msteams-feeds-automate`), die daraus zentral die
 Teams-Adaptive-Card rendert. **Bewusst kein Drittanbieter-SaaS.**
 
 ## Familienstandard mit status-page-to-chat (WICHTIG)
@@ -19,8 +20,8 @@ Schwester-Projekt: `status-page-to-chat` (lokal: `/home/gzuercher/git-work/statu
   (dort heißt `hasItems` noch `hasIncidents`), `lib/errorCategory.ts`, `lib/httpClient.ts`.
   Änderungen daran immer in beiden Repos nachziehen (Notiz an die andere Session).
 - **Ops-Events**: Health-/Token-Meldungen gehen mit `type: "ops"` durch denselben
-  Webhook (Contract-Erweiterung; Rendering muss in `msteams-feeds-automate` noch
-  gebaut werden — siehe README-Roadmap).
+  Webhook (Contract-Erweiterung; Rendering in `raptus-integration-router` ist
+  seit 2026-07-15 gebaut).
 - **Adapter sind zustandslose Fetcher**: liefern Bestand im Sichtfenster, ungefiltert;
   Dedup/Bootstrap/State zentral (`poller.ts` + `state/store.ts`). `fetchComments(posts)`
   bekommt die jüngsten Posts aus der zentralen Registry übergeben.
@@ -50,19 +51,19 @@ Schwester-Projekt: `status-page-to-chat` (lokal: `/home/gzuercher/git-work/statu
 - Docker: `HEALTHCHECK` via `main.js health` (prüft `last_run_at` < 15 min).
 
 ## Nächste Schritte
-1. **`type:"ops"`-Rendering in `msteams-feeds-automate`** (Contract siehe README) —
-   ohne diesen Zweig kommen Ops-Karten in der Logic App unbekannt an. Der
-   social-Contract dort ist die Quelle der Wahrheit; nach Änderungen beidseitig
-   abgleichen.
-2. **Live-Verifikation der Adapter** mit echten Tokens/IDs, in dieser Reihenfolge:
+1. **Live-Verifikation der Adapter** mit echten Tokens/IDs, in dieser Reihenfolge:
    LinkedIn (Token vorhanden: `r_organization_social`, App „SoloPostics",
    Client `78s5jdboo592ss`; 60-Tage-Token → `tokenExpiresAt` pflegen!), dann
    Facebook, Instagram (IG-Business-Konto mit FB-Page verknüpfen!). Besonders
    prüfen: Feldnamen der LinkedIn-Kommentare (defensiv gemappt, siehe
    `linkedin.ts`-Header) und die Autor-URN-Darstellung.
-3. TikTok erst produktiv nehmen, wenn der Token-Refresh-Flow gebaut ist
+2. TikTok erst produktiv nehmen, wenn der Token-Refresh-Flow gebaut ist
    (Access-Tokens nur 24 h gültig).
-4. Stats (P3): erst Contract mit der Logic App designen, dann eigener seltener Job.
+3. Stats (P3): erst Contract mit der Logic App designen, dann eigener seltener Job.
+
+Der social-Contract (inkl. `type:"ops"`, seit 2026-07-15 dort gerendert) lebt
+als Quelle der Wahrheit in `raptus-integration-router` — nach Contract-
+Änderungen beidseitig abgleichen.
 
 Adapter-Regeln (für Änderungen/neue Plattformen): `httpGet`/`httpPost` aus
 `lib/httpClient.ts` nutzen (Timeout/Retry inklusive), Bestand im Sichtfenster
@@ -76,7 +77,8 @@ pnpm, ESM (Node16), strict TS, vitest, eslint (strict) + prettier (printWidth 10
 Secrets NIE committen — Repo ist Open Source (MIT), auch wenn das GitHub-Repo privat ist.
 
 ## Verwandte Repos
-- `msteams-feeds-automate` — Logic Apps, u. a. `feeds/social` (Teams-Renderer,
-  liefert den Contract; braucht noch den `type:"ops"`-Zweig) und
-  `feeds/social-facebook` (pausierter FB-Webhook-Empfänger).
+- `raptus-integration-router` (ehemals `msteams-feeds-automate`) — Logic Apps,
+  u. a. `feeds/social` (Teams-Renderer, liefert den Contract; rendert seit
+  2026-07-15 auch `type:"ops"`) und `feeds/social-facebook` (pausierter
+  FB-Webhook-Empfänger).
 - `status-page-to-chat` — Familienstandard-Referenz (gespiegelte Module, read-only!).

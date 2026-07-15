@@ -12,7 +12,7 @@ import type { PostRef, SocialEvent, SocialProvider, SocialStats } from "./types.
  *      pages_read_engagement / pages_read_user_content.
  * Polling ODER Webhook möglich — hier Polling (analog zu den anderen Adaptern;
  * die pausierte Push-Variante lebt als Logic App feeds/social-facebook im
- * msteams-feeds-automate-Repo).
+ * raptus-integration-router-Repo).
  *
  * Endpunkte:
  *   Posts:      GET /{page-id}/published_posts?fields=id,message,permalink_url,created_time

@@ -43,9 +43,10 @@ jobs:
       - name: Test
         run: pnpm test
 
-      - name: Audit dependencies
-        run: pnpm audit --prod --audit-level=high
-        continue-on-error: true
+      # Kein `pnpm audit`-Step mehr: npm hat die alten Audit-Endpoints
+      # abgeschaltet (HTTP 410) → der Step schlug immer fehl und produzierte
+      # nur Fehler-Annotationen. Dependency-Hygiene macht Dependabot
+      # (.github/dependabot.yml, gespiegelt von status-page-to-chat).
 
   # Verhindert, dass das Dockerfile unbemerkt verrottet (Build-only, kein Push).
   docker-build:

@@ -113,8 +113,12 @@ node dist/src/main.js health     # HEALTHCHECK: letzter Lauf < 15 min?
 
 Der Docker-`HEALTHCHECK` nutzt `health` automatisch; beim allerersten Lauf pro
 Plattform wird der Bestand **still eingelesen** (kein Post-Flood im Kanal).
-Token-Abläufe (`tokenExpiresAt` in der YAML) und anhaltende Adapter-Ausfälle
-meldet der Poller selbst als Karte in den Chat.
+
+**Tokens:** LinkedIn/TikTok erneuert der Poller nach einmaligem OAuth-Consent
+selbst (`refresh:`-Block in der YAML); für Facebook/Instagram nutzt man nie
+ablaufende System-User-Tokens. Einrichtung und die wenigen verbleibenden
+manuellen Schritte: [docs/TOKENS.md](docs/TOKENS.md). Abläufe, Refresh-Ausfälle
+und anhaltende Adapter-Ausfälle meldet der Poller selbst als Karte in den Chat.
 
 ## Konfiguration
 
@@ -135,8 +139,9 @@ meldet der Poller selbst als Karte in den Chat.
       (`raptus-integration-router`, seit 2026-07-15)
 - [ ] **Live-Verifikation aller Adapter mit echten Tokens/IDs** (Feld-Mapping
       bei LinkedIn-Kommentaren ist defensiv, siehe Datei-Header)
-- [ ] LinkedIn-Token-Auto-Refresh (Ausbaustufe 2 des Token-Watchdogs);
-      TikTok braucht für Produktivbetrieb zwingend einen Refresh-Flow (24-h-Tokens)
+- [x] Token-Auto-Refresh für LinkedIn + TikTok (einmaliger OAuth-Consent,
+      danach erneuert der Poller selbst; Meta läuft über nie ablaufende
+      System-User-Tokens) — Setup-Schritte: [docs/TOKENS.md](docs/TOKENS.md)
 - [ ] Stats-Contract designen (Priorität 3, mit raptus-integration-router)
 - [ ] Digest / periodische Zusammenfassung
 - [ ] GHCR-Image-Publish-Workflow (analog status-page-to-chat)

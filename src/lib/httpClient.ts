@@ -164,7 +164,10 @@ export async function httpGet(url: string, options?: HttpOptions): Promise<HttpR
 }
 
 /**
- * HTTP POST für Notifier (Webhooks).
+ * HTTP POST für Notifier (Webhooks) und OAuth-Endpunkte.
+ *
+ * Objekte werden als JSON serialisiert; ein String-Payload geht unverändert
+ * raus (z. B. form-encodierte OAuth-Bodies — dann `contentType` setzen).
  */
 export async function httpPost(
   url: string,
@@ -180,7 +183,7 @@ export async function httpPost(
         "Content-Type": options?.contentType ?? "application/json; charset=utf-8",
         ...options?.headers,
       },
-      body: JSON.stringify(payload),
+      body: typeof payload === "string" ? payload : JSON.stringify(payload),
     },
     options?.retries ?? DEFAULT_RETRIES,
   );

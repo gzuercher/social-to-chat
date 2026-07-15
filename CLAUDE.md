@@ -26,8 +26,12 @@ Schwester-Projekt: `status-page-to-chat` (lokal: `/home/gzuercher/git-work/statu
   Dedup/Bootstrap/State zentral (`poller.ts` + `state/store.ts`). `fetchComments(posts)`
   bekommt die jüngsten Posts aus der zentralen Registry übergeben.
 - **Erstlauf**: Bestand wird still eingelesen (Bootstrap-Flag), kein Chat-Flood.
-- **Token-Watchdog**: `tokenExpiresAt` je Provider in der YAML; warnt T-14/7/1 und
-  bei Ablauf (einmal je Stufe, Reset bei neuem Datum). Auto-Refresh = Ausbaustufe 2.
+- **Token-Management**: Auto-Refresh für LinkedIn/TikTok (`lib/tokenRefresh.ts`,
+  `options.refresh` in der YAML; Zustand inkl. rotierter Refresh-Tokens in der
+  Store-Metadata, injiziert Access-Tokens in die tokenEnv). Statischer Watchdog
+  (`tokenExpiresAt`, T-14/7/1) nur noch für Provider ohne Refresh (z. B. Meta-
+  Fallback; empfohlen dort: System-User-Token, läuft nie ab). Manuelle
+  Einmal-Schritte je Plattform: docs/TOKENS.md.
 
 ## Prioritäten (Reihenfolge der Umsetzung)
 1. **Neue Posts** – alle Plattformen
@@ -57,9 +61,13 @@ Schwester-Projekt: `status-page-to-chat` (lokal: `/home/gzuercher/git-work/statu
    Facebook, Instagram (IG-Business-Konto mit FB-Page verknüpfen!). Besonders
    prüfen: Feldnamen der LinkedIn-Kommentare (defensiv gemappt, siehe
    `linkedin.ts`-Header) und die Autor-URN-Darstellung.
-2. TikTok erst produktiv nehmen, wenn der Token-Refresh-Flow gebaut ist
-   (Access-Tokens nur 24 h gültig).
+2. Token-Einrichtung je Plattform (einmalige menschliche Schritte, docs/TOKENS.md):
+   LinkedIn/TikTok OAuth-Consent für den Auto-Refresh, Meta System-User-Token.
 3. Stats (P3): erst Contract mit der Logic App designen, dann eigener seltener Job.
+
+Spiegel-Hinweis für status-page-to-chat: `httpClient.httpPost` akzeptiert jetzt
+auch String-Payloads (form-encodierte Bodies, für OAuth) — beim nächsten
+Modul-Abgleich mitnehmen.
 
 Der social-Contract (inkl. `type:"ops"`, seit 2026-07-15 dort gerendert) lebt
 als Quelle der Wahrheit in `raptus-integration-router` — nach Contract-

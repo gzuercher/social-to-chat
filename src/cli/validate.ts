@@ -1,4 +1,5 @@
 import { loadConfig } from "../lib/config.js";
+import { hasRefreshConfig } from "../lib/tokenRefresh.js";
 
 /**
  * Subcommand: Config-Validierung ohne Seiteneffekte.
@@ -17,9 +18,10 @@ export function runValidate(): void {
         `[${active.map((p) => p.key).join(", ")}], schedule "${config.schedule}", db "${config.dbPath}"\n`,
     );
     for (const p of active) {
-      if (!p.tokenExpiresAt) {
+      if (!p.tokenExpiresAt && !hasRefreshConfig(p)) {
         process.stdout.write(
-          `  hint: ${p.key} hat kein tokenExpiresAt — der Token-Watchdog kann nicht vorwarnen.\n`,
+          `  hint: ${p.key} hat weder tokenExpiresAt noch options.refresh — ` +
+            `kein Vorwarnen und kein Auto-Refresh (siehe docs/TOKENS.md).\n`,
         );
       }
     }

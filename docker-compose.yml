@@ -7,11 +7,18 @@ services:
     environment:
       # Ziel-Webhook (social-feed Logic App). Pflicht.
       WEBHOOK_URL: ${WEBHOOK_URL:?WEBHOOK_URL must be set in .env or stack environment}
-      # Plattform-Tokens (nur die aktiv genutzten setzen).
+      # Plattform-Tokens (nur die aktiv genutzten setzen). Siehe docs/TOKENS.md
       LINKEDIN_ACCESS_TOKEN: ${LINKEDIN_ACCESS_TOKEN:-}
       FACEBOOK_PAGE_TOKEN: ${FACEBOOK_PAGE_TOKEN:-}
       INSTAGRAM_ACCESS_TOKEN: ${INSTAGRAM_ACCESS_TOKEN:-}
       TIKTOK_ACCESS_TOKEN: ${TIKTOK_ACCESS_TOKEN:-}
+      # Token-Auto-Refresh (LinkedIn/TikTok; Meta braucht keinen — System-User-Token).
+      LINKEDIN_REFRESH_TOKEN: ${LINKEDIN_REFRESH_TOKEN:-}
+      LINKEDIN_CLIENT_ID: ${LINKEDIN_CLIENT_ID:-}
+      LINKEDIN_CLIENT_SECRET: ${LINKEDIN_CLIENT_SECRET:-}
+      TIKTOK_REFRESH_TOKEN: ${TIKTOK_REFRESH_TOKEN:-}
+      TIKTOK_CLIENT_KEY: ${TIKTOK_CLIENT_KEY:-}
+      TIKTOK_CLIENT_SECRET: ${TIKTOK_CLIENT_SECRET:-}
       CONFIG_PATH: /app/config/platforms.yaml
       STATE_DB_PATH: /data/social-to-chat.db
       # LOG_LEVEL: info

@@ -8,6 +8,7 @@ import {
   type PollResult as HealthPollResult,
 } from "./lib/healthTracker.js";
 import { checkTokenExpiry } from "./lib/tokenWatchdog.js";
+import { ensureFreshTokens, hasRefreshConfig } from "./lib/tokenRefresh.js";
 import { LAST_RUN_METADATA_KEY, Store } from "./state/store.js";
 import { createProvider } from "./platforms/index.js";
 import type { Notifier, OpsEvent, SocialEvent, SocialProvider } from "./platforms/types.js";
@@ -182,6 +183,17 @@ export async function runOnce(platforms: PlatformConfig[], deps: PollerDeps): Pr
   const healthInput: HealthPollResult[] = [];
   const cfgByKey = new Map(active.map((p) => [p.key, p]));
 
+  // Token-Auto-Refresh VOR dem Fetch: injiziert frische Access-Tokens in die
+  // tokenEnv der Provider; Warnungen (Refresh kaputt / Re-Autorisierung nötig)
+  // gehen als Ops-Events raus.
+  try {
+    for (const event of await ensureFreshTokens(active, store, logger)) {
+      await sendOpsIsolated(notifier, event, summary);
+    }
+  } catch (err) {
+    logger.error({ err }, "Token-Auto-Refresh fehlgeschlagen");
+  }
+
   const results = await Promise.allSettled(
     active.map(async (cfg) => {
       const provider = providerFactory(cfg, logger);
@@ -224,9 +236,13 @@ export async function runOnce(platforms: PlatformConfig[], deps: PollerDeps): Pr
     logger.error({ err }, "HealthTracker-Auswertung fehlgeschlagen");
   }
 
-  // Token-Watchdog: Ablauf-Warnungen als Ops-Events.
+  // Statischer Token-Watchdog (tokenExpiresAt) — nur für Provider OHNE
+  // Auto-Refresh, sonst gäbe es doppelte Warnungen.
   try {
-    for (const event of checkTokenExpiry(active, store)) {
+    for (const event of checkTokenExpiry(
+      active.filter((p) => !hasRefreshConfig(p)),
+      store,
+    )) {
       await sendOpsIsolated(notifier, event, summary);
     }
   } catch (err) {

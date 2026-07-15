@@ -20,12 +20,18 @@ platforms:
     platform: linkedin
     name: "Raptus AG (LinkedIn)"
     enabled: true
-    # Ablaufdatum des Tokens (ISO-Datum). Der Poller warnt bei T-14/T-7/T-1
-    # Tagen per Ops-Karte im Chat. Nach jedem Token-Erneuern hier nachführen.
-    tokenExpiresAt: "2026-09-01"
+    # OHNE Auto-Refresh: Ablaufdatum des Tokens pflegen (ISO-Datum), der
+    # Poller warnt bei T-14/T-7/T-1 per Ops-Karte. MIT refresh-Block weglassen.
+    # tokenExpiresAt: "2026-09-01"
     options:
       organizationUrn: "urn:li:organization:XXXXXXXX"
       tokenEnv: "LINKEDIN_ACCESS_TOKEN"
+      # Auto-Refresh (empfohlen): Poller erneuert den Access-Token selbst.
+      # Einmaliger OAuth-Consent nötig — siehe docs/TOKENS.md.
+      refresh:
+        refreshTokenEnv: "LINKEDIN_REFRESH_TOKEN"
+        clientIdEnv: "LINKEDIN_CLIENT_ID"
+        clientSecretEnv: "LINKEDIN_CLIENT_SECRET"
 
   - key: raptus-facebook
     platform: facebook
@@ -50,6 +56,10 @@ platforms:
     enabled: false
     options:
       # Achtung: Kommentare sind über TikTok nicht lesbar (nur Posts + Stats).
-      # Achtung 2: TikTok-Access-Tokens sind nur 24 h gültig — ohne
-      # Refresh-Flow (noch nicht gebaut) nicht produktiv aktivieren.
+      # TikTok-Access-Tokens leben nur 24 h → der refresh-Block ist hier
+      # PFLICHT für den Produktivbetrieb (clientIdEnv = client_key!).
       tokenEnv: "TIKTOK_ACCESS_TOKEN"
+      refresh:
+        refreshTokenEnv: "TIKTOK_REFRESH_TOKEN"
+        clientIdEnv: "TIKTOK_CLIENT_KEY"
+        clientSecretEnv: "TIKTOK_CLIENT_SECRET"

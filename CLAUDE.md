@@ -53,6 +53,12 @@ Schwester-Projekt: `status-page-to-chat` (lokal: `/home/gzuercher/git-work/statu
 - `src/state/store.ts` — better-sqlite3: `seen_events`, `posts`, `metadata`.
 - `src/notify/webhook.ts` — `send()` (strippt `externalId`) + `sendOps()`.
 - Docker: `HEALTHCHECK` via `main.js health` (prüft `last_run_at` < 15 min).
+- `src/cli/setup.ts` — **Setup-Wizard** (`main.js setup`): localhost-Web-UI für
+  Token-Einrichtung/Re-Consent. LinkedIn-OAuth-Flow (Wizard = Redirect-URI,
+  Org-URN-Discovery), Meta me/accounts-Discovery (Page-Token/IG-ID), TikTok-
+  Paste-Modus mit sofortiger Refresh-Validierung (Rotation!). Schreibt `.env`
+  (`lib/envFile.ts`) und `platforms.yaml` kommentar-erhaltend (`lib/yamlConfig.ts`).
+  main.ts lädt die `.env` selbst (Container-ENV hat Vorrang).
 
 ## Nächste Schritte
 1. **Live-Verifikation der Adapter** mit echten Tokens/IDs, in dieser Reihenfolge:

@@ -89,10 +89,18 @@ an denselben Webhook — der Chat-Kanal ist zugleich der Alarmkanal:
 
 ```bash
 pnpm install
-cp .env.example .env                        # WEBHOOK_URL + Tokens eintragen
-cp config/platforms.yaml.example config/platforms.yaml
-pnpm build && pnpm start
+cp .env.example .env                        # WEBHOOK_URL eintragen
+pnpm build
+node dist/src/main.js setup                 # geführte Token-Einrichtung (Web-UI)
+pnpm start
 ```
+
+Der **Setup-Wizard** (`setup`, nur localhost; auf Servern via
+`ssh -L 8911:localhost:8911 <server>`) führt durch LinkedIn-OAuth, Meta- und
+TikTok-Einrichtung, validiert Tokens sofort und schreibt `.env` +
+`config/platforms.yaml` selbst — auch für den jährlichen LinkedIn-Re-Consent.
+Details: [docs/TOKENS.md](docs/TOKENS.md). Manuelle Alternative:
+`cp config/platforms.yaml.example config/platforms.yaml` und Werte eintragen.
 
 ## Betrieb (Container)
 
@@ -107,6 +115,7 @@ Secrets kommen ausschließlich aus Umgebungsvariablen; die YAML enthält nur
 Nützliche Subcommands (auch im Container):
 
 ```bash
+node dist/src/main.js setup      # geführte Token-Einrichtung (Web-UI, localhost)
 node dist/src/main.js validate   # Config prüfen (Exit 0/1)
 node dist/src/main.js health     # HEALTHCHECK: letzter Lauf < 15 min?
 ```

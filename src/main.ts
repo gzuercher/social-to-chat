@@ -7,6 +7,8 @@ import { WebhookNotifier } from "./notify/webhook.js";
 import { runOnce } from "./poller.js";
 import { runHealthcheck } from "./cli/health.js";
 import { runValidate } from "./cli/validate.js";
+import { runSetup } from "./cli/setup.js";
+import { loadEnvFile } from "./lib/envFile.js";
 
 /**
  * Container-Entrypoint (Muster gespiegelt von status-page-to-chat):
@@ -80,12 +82,18 @@ async function main(): Promise<void> {
   process.on("SIGTERM", () => shutdown("SIGTERM"));
 }
 
+// .env laden (falls vorhanden) — bereits gesetzte Container-ENV hat Vorrang.
+// Macht `poll`/`validate` direkt nach dem Setup-Wizard lauffähig.
+loadEnvFile(process.env.ENV_PATH ?? "./.env");
+
 const subcommand = process.argv[2];
 
 if (subcommand === "validate") {
   runValidate();
 } else if (subcommand === "health") {
   runHealthcheck();
+} else if (subcommand === "setup") {
+  runSetup();
 } else if (subcommand === undefined || subcommand === "poll") {
   main().catch((err: unknown) => {
     logger.fatal({ err }, "Poller konnte nicht starten");
@@ -94,7 +102,7 @@ if (subcommand === "validate") {
 } else {
   process.stderr.write(
     `Unbekannter Subcommand: ${subcommand}\n` +
-      `Usage: node dist/src/main.js [poll|validate|health]\n`,
+      `Usage: node dist/src/main.js [poll|validate|health|setup]\n`,
   );
   process.exit(2);
 }

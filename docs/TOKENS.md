@@ -4,6 +4,27 @@ Ziel: **einmalige menschliche Einrichtung pro Plattform, danach null manuelle
 Schritte.** Dieses Dokument listet ehrlich auf, was automatisch läuft und wo
 zwingend ein Mensch ran muss.
 
+## Der empfohlene Weg: Setup-Wizard
+
+Für die Einrichtung (und den jährlichen LinkedIn-Re-Consent) gibt es ein
+geführtes Web-Interface — keine curl-Befehle, kein Code-Kopieren:
+
+```bash
+# lokal auf dem Server:
+node dist/src/main.js setup
+# vom Arbeitsplatz aus erreichbar machen:
+ssh -L 8911:localhost:8911 <server>     # dann http://localhost:8911 öffnen
+```
+
+Der Wizard bindet **nur an localhost**, führt pro Plattform durch die Schritte,
+validiert Tokens sofort gegen die echten APIs, entdeckt Organisation-URN /
+Page-ID / IG-User-ID automatisch und schreibt `.env` + `config/platforms.yaml`.
+Einzige Einmal-Vorarbeit: die Redirect-URL `http://localhost:8911/callback/linkedin`
+in der LinkedIn-App registrieren (der Wizard zeigt sie an).
+
+Die folgenden Abschnitte erklären die Hintergründe und dienen als Referenz,
+falls man den Weg manuell gehen will oder der Wizard nicht verfügbar ist.
+
 ## Übersicht
 
 | Plattform | Automatisierungsgrad | Menschliche Schritte |

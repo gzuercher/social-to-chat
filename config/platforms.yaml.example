@@ -16,10 +16,12 @@ webhookUrl: "${WEBHOOK_URL}"
 dbPath: "./data/social-to-chat.db"
 
 platforms:
+  # enabled setzt der Setup-Wizard beim Abschluss der Einrichtung — im
+  # Template ist alles aus, damit das Config-Seeding im Container gefahrlos ist.
   - key: raptus-linkedin
     platform: linkedin
     name: "Raptus AG (LinkedIn)"
-    enabled: true
+    enabled: false
     # OHNE Auto-Refresh: Ablaufdatum des Tokens pflegen (ISO-Datum), der
     # Poller warnt bei T-14/T-7/T-1 per Ops-Karte. MIT refresh-Block weglassen.
     # tokenExpiresAt: "2026-09-01"

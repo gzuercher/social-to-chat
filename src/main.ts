@@ -1,3 +1,4 @@
+import { copyFileSync, existsSync, statSync } from "node:fs";
 import { Cron } from "croner";
 import { loadConfig } from "./lib/config.js";
 import { logger } from "./lib/logger.js";
@@ -11,6 +12,38 @@ import { runSetup } from "./cli/setup.js";
 import { loadEnvFile } from "./lib/envFile.js";
 
 /**
+ * Seedet die platforms.yaml beim ersten Start aus dem Template (Muster
+ * gespiegelt von status-page-to-chat): ermöglicht `docker compose up -d`
+ * mit leerem State-Volume — die Datei landet einmalig im Volume, der
+ * Setup-Wizard patcht sie danach. Im Template sind alle Plattformen
+ * deaktiviert, der Seed ist also gefahrlos. Beide ENV setzt das Dockerfile;
+ * außerhalb des Containers ist die Funktion ein No-op.
+ */
+function seedConfigFileIfMissing(): void {
+  const configPath = process.env.CONFIG_PATH;
+  const templatePath = process.env.PLATFORMS_TEMPLATE_PATH;
+  if (!configPath || !templatePath) return;
+  // Leere Datei = „fehlt" (Überbleibsel eines früheren Deployments).
+  if (existsSync(configPath)) {
+    try {
+      if (statSync(configPath).size > 0) return;
+    } catch {
+      return;
+    }
+  }
+  if (!existsSync(templatePath)) {
+    logger.warn({ configPath, templatePath }, "Seed-Template fehlt, überspringe Config-Seeding");
+    return;
+  }
+  try {
+    copyFileSync(templatePath, configPath);
+    logger.info({ from: templatePath, to: configPath }, "platforms.yaml aus Template geseedet");
+  } catch (err) {
+    logger.error({ err, configPath, templatePath }, "Config-Seeding fehlgeschlagen");
+  }
+}
+
+/**
  * Container-Entrypoint (Muster gespiegelt von status-page-to-chat):
  * Config laden, sofort einen Lauf starten (Logs zeigen schnell Aktivität),
  * dann nach Zeitplan. Läufe überlappen nie (croner protect + isRunning-
@@ -18,6 +51,7 @@ import { loadEnvFile } from "./lib/envFile.js";
  * Die eigentliche Poll-Logik lebt testbar in poller.ts.
  */
 async function main(): Promise<void> {
+  seedConfigFileIfMissing();
   const config = loadConfig();
   const store = new Store(config.dbPath);
   const notifier = new WebhookNotifier(config.webhookUrl, logger);

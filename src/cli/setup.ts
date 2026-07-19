@@ -34,13 +34,25 @@ import { loadConfig } from "../lib/config.js";
  */
 
 const PORT = Number(process.env.SETUP_PORT ?? 8911);
+/**
+ * Bind-Adresse. Default localhost (SSH-Tunnel-Betrieb). Im Container hinter
+ * einem authentifizierenden Reverse-Proxy (Caddy mit basic_auth):
+ * SETUP_BIND=0.0.0.0 — NIE ohne vorgeschaltete Auth nach außen öffnen.
+ */
+const BIND = process.env.SETUP_BIND ?? "127.0.0.1";
+/**
+ * Öffentliche Basis-URL des Wizards, bestimmt die OAuth-Redirect-URI.
+ * Hinter Caddy z. B. https://social-notifs-setup.example.com — diese
+ * Redirect-URI einmalig in der LinkedIn-App registrieren.
+ */
+const PUBLIC_URL = (process.env.SETUP_PUBLIC_URL ?? `http://localhost:${PORT}`).replace(/\/+$/, "");
 const ENV_PATH = process.env.ENV_PATH ?? "./.env";
 const CONFIG_PATH = process.env.CONFIG_PATH ?? "./config/platforms.yaml";
 const EXAMPLE_PATH = "./config/platforms.yaml.example";
 const LINKEDIN_VERSION = "202506";
 const GRAPH_BASE = "https://graph.facebook.com/v23.0";
 
-const REDIRECT_URI = `http://localhost:${PORT}/callback/linkedin`;
+const REDIRECT_URI = `${PUBLIC_URL}/callback/linkedin`;
 
 /** Kurzlebiger In-Memory-Zustand zwischen zwei Wizard-Schritten. */
 type PendingLinkedIn = {
@@ -572,13 +584,19 @@ export function runSetup(): void {
       send(res, page("Fehler", `<p class="err">${esc((err as Error).message)}</p>`), 500);
     });
   });
-  // Bewusst NUR localhost — auf Servern per `ssh -L 8911:localhost:8911` nutzen.
-  server.listen(PORT, "127.0.0.1", () => {
+  // Default: NUR localhost (SSH-Tunnel). Im Container: SETUP_BIND=0.0.0.0,
+  // aber ausschließlich hinter einem authentifizierenden Proxy (Caddy basic_auth).
+  server.listen(PORT, BIND, () => {
+    const tunnelHint =
+      BIND === "127.0.0.1"
+        ? `Auf einem Server: lokal \`ssh -L ${PORT}:localhost:${PORT} <server>\` starten.\n`
+        : `⚠️  Bind ${BIND} — nur hinter einem authentifizierenden Reverse-Proxy betreiben!\n`;
     process.stdout.write(
       `\nsocial-to-chat Setup-Wizard läuft:\n\n` +
-        `    http://localhost:${PORT}\n\n` +
-        `Auf einem Server: lokal \`ssh -L ${PORT}:localhost:${PORT} <server>\` starten\n` +
-        `und die URL im Browser öffnen. Beenden mit Ctrl+C.\n\n`,
+        `    ${PUBLIC_URL}\n\n` +
+        tunnelHint +
+        `LinkedIn-Redirect-URI (in der App registrieren): ${REDIRECT_URI}\n` +
+        `Beenden mit Ctrl+C.\n\n`,
     );
   });
   process.on("SIGINT", () => process.exit(0));

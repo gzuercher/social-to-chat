@@ -41,7 +41,8 @@ USER app
 
 ENV NODE_ENV=production \
     STATE_DB_PATH=/data/social-to-chat.db \
-    CONFIG_PATH=/app/config/platforms.yaml
+    CONFIG_PATH=/app/config/platforms.yaml \
+    PLATFORMS_TEMPLATE_PATH=/app/config/platforms.yaml.example
 
 VOLUME ["/data"]
 

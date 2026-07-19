@@ -125,9 +125,12 @@ Plattform wird der Bestand **still eingelesen** (kein Post-Flood im Kanal).
 
 **Tokens:** LinkedIn/TikTok erneuert der Poller nach einmaligem OAuth-Consent
 selbst (`refresh:`-Block in der YAML); für Facebook/Instagram nutzt man nie
-ablaufende System-User-Tokens. Einrichtung und die wenigen verbleibenden
-manuellen Schritte: [docs/TOKENS.md](docs/TOKENS.md). Abläufe, Refresh-Ausfälle
-und anhaltende Adapter-Ausfälle meldet der Poller selbst als Karte in den Chat.
+ablaufende System-User-Tokens. Technische Referenz:
+[docs/TOKENS.md](docs/TOKENS.md) — **Bedienungsanleitung für die jährliche
+Erneuerung (auch für Nicht-Techniker):
+[docs/ANLEITUNG-TOKEN-ERNEUERUNG.md](docs/ANLEITUNG-TOKEN-ERNEUERUNG.md)**.
+Abläufe, Refresh-Ausfälle und anhaltende Adapter-Ausfälle meldet der Poller
+selbst als Karte in den Chat.
 
 ## Konfiguration
 

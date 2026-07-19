@@ -309,10 +309,11 @@ export async function ensureFreshTokens(
               cfg,
               daysLeft === 0
                 ? `Der Refresh-Token für ${cfg.name || cfg.key} ist abgelaufen — einmalige` +
-                    ` Re-Autorisierung durch einen Menschen nötig (docs/TOKENS.md).`
+                    ` Re-Autorisierung nötig. Anleitung: docs/ANLEITUNG-TOKEN-ERNEUERUNG.md` +
+                    ` im Repo social-to-chat.`
                 : `Der Refresh-Token für ${cfg.name || cfg.key} läuft in ${daysLeft} Tag` +
-                    `${daysLeft === 1 ? "" : "en"} ab — bitte einmalig neu autorisieren` +
-                    ` (docs/TOKENS.md).`,
+                    `${daysLeft === 1 ? "" : "en"} ab — bitte einmalig neu autorisieren.` +
+                    ` Anleitung: docs/ANLEITUNG-TOKEN-ERNEUERUNG.md im Repo social-to-chat.`,
               { daysLeft },
               nowMs,
             ),

@@ -4,6 +4,11 @@ Ziel: **einmalige menschliche Einrichtung pro Plattform, danach null manuelle
 Schritte.** Dieses Dokument listet ehrlich auf, was automatisch läuft und wo
 zwingend ein Mensch ran muss.
 
+> **Für Nicht-Techniker:** Die Schritt-für-Schritt-Bedienungsanleitung
+> (jährliche LinkedIn-Erneuerung, Ersteinrichtung) steht in
+> [ANLEITUNG-TOKEN-ERNEUERUNG.md](ANLEITUNG-TOKEN-ERNEUERUNG.md).
+> Dieses Dokument hier ist die technische Referenz.
+
 ## Der empfohlene Weg: Setup-Wizard
 
 Für die Einrichtung (und den jährlichen LinkedIn-Re-Consent) gibt es ein

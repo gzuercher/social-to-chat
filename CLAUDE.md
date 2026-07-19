@@ -60,6 +60,10 @@ Schwester-Projekt: `status-page-to-chat` (lokal: `/home/gzuercher/git-work/statu
   (`lib/envFile.ts`) und `platforms.yaml` kommentar-erhaltend (`lib/yamlConfig.ts`).
   main.ts lädt die `.env` selbst (Container-ENV hat Vorrang).
 
+Meta-Seite: Im Business-Portfolio der Raptus AG existiert die interne App
+**„Social-to-Chat-Internal"** (App-ID 1591886198962675) — sie ist der
+App-Kontext für den System-User-Token (Meta vergibt Tokens nur app-gebunden).
+
 ## Nächste Schritte
 1. **Live-Verifikation der Adapter** mit echten Tokens/IDs, in dieser Reihenfolge:
    LinkedIn (Token vorhanden: `r_organization_social`, App „SoloPostics",

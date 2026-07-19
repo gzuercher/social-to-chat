@@ -91,14 +91,22 @@ Meta bietet **keinen Refresh-Token-Mechanismus**. Der Weg zu null manuellen
 Schritten ist ein anderer:
 
 **Empfohlen — System-User-Token (läuft nie ab):**
-1. Im Meta Business Manager einen **System User** (Typ Admin oder Employee)
+1. **Business-App anlegen** (Business-Portfolio → Einstellungen → Konten →
+   Apps → Hinzufügen), z. B. „Social-to-Chat-Internal". Meta stellt Tokens
+   immer im Kontext einer App aus — ohne App gibt es keinen
+   Token-generieren-Dialog. Die App braucht keine öffentliche Freigabe
+   (interner Business-Use-Case).
+2. Im Meta Business Manager einen **System User** (Typ Admin oder Employee)
    anlegen.
-2. Der Page (und dem verknüpften IG-Business-Konto) als Asset zuweisen.
-3. Token generieren mit Scopes `pages_read_engagement`,
-   `pages_read_user_content`, `instagram_basic`, `instagram_manage_comments`
-   — **ohne Ablauf** („Never expires" wählen).
-4. In `.env` als `FACEBOOK_PAGE_TOKEN` / `INSTAGRAM_ACCESS_TOKEN` eintragen.
-   Kein `tokenExpiresAt`, kein `refresh:`-Block nötig. Fertig — dauerhaft.
+3. Dem System User die Assets zuweisen: die **App** aus Schritt 1 sowie die
+   Page (und das verknüpfte IG-Business-Konto).
+4. Token generieren (App aus Schritt 1 auswählen) mit Scopes
+   `pages_read_engagement`, `pages_read_user_content`, `instagram_basic`,
+   `instagram_manage_comments` — **ohne Ablauf** („Never expires" wählen).
+5. Den Token im Setup-Wizard (Seite „Facebook/Instagram") einfügen — er
+   validiert ihn und findet Page-ID/IG-ID selbst. (Manuell: in `.env` als
+   `FACEBOOK_PAGE_TOKEN` / `INSTAGRAM_ACCESS_TOKEN`.) Kein `tokenExpiresAt`,
+   kein `refresh:`-Block nötig. Fertig — dauerhaft.
 
 **Fallback — long-lived User/Page-Token:** ~60 Tage gültig; dann
 `tokenExpiresAt` in der YAML pflegen, der statische Watchdog warnt bei

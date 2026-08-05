@@ -64,6 +64,17 @@ Meta-Seite: Im Business-Portfolio der Raptus AG existiert die interne App
 **„Social-to-Chat-Internal"** (App-ID 1591886198962675) — sie ist der
 App-Kontext für den System-User-Token (Meta vergibt Tokens nur app-gebunden).
 
+## Live-Stand (2026-07-19)
+- **LinkedIn Posts: verifiziert ✅** (Org `urn:li:organization:2127937`, Feld-Mapping
+  id/commentary/publishedAt bestätigt). Läuft produktiv im Stack
+  `/opt/stacks/raptus-social-notifs` (Container `raptus-social-notifs`).
+- **LinkedIn Kommentare: blockiert ⚠️** — `/rest/socialActions/…` gehört zum
+  Community-Management-**Partnerprogramm**, ohne Freigabe `403
+  partnerApiSocialActions`. Deshalb `comments: false` in der Live-Config.
+- **API-Version**: nicht mehr gepinnt — Default ist der Vormonat
+  (`defaultApiVersion()`), sonst bricht der Adapter jährlich mit `426`.
+- Meta/TikTok: Tokens noch nicht eingerichtet.
+
 ## Nächste Schritte
 1. **Live-Verifikation der Adapter** mit echten Tokens/IDs, in dieser Reihenfolge:
    LinkedIn (Token vorhanden: `r_organization_social`, App „SoloPostics",

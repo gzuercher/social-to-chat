@@ -23,6 +23,14 @@ const platformSchema = z.object({
   /** Ob dieser Adapter aktiv gepollt wird. */
   enabled: z.boolean().default(true),
   /**
+   * Ob Kommentare gepollt werden (Priorität 2). Auf `false` setzen, wenn die
+   * Plattform sie nicht freigibt — z. B. LinkedIn ohne Community-Management-
+   * Partnerfreigabe: dann laufen Posts weiter, statt dass der Adapter jeden
+   * Zyklus an den Kommentaren scheitert. TikTok ignoriert das Feld (liefert
+   * ohnehin nie Kommentare).
+   */
+  comments: z.boolean().default(true),
+  /**
    * Ablaufdatum des Plattform-Tokens (ISO-Datum, z. B. "2026-09-01").
    * Der Token-Watchdog warnt bei T-14/T-7/T-1 Tagen per Ops-Event in den
    * Chat. Weglassen = keine Ablauf-Warnung (401-Erkennung greift trotzdem).

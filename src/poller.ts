@@ -57,6 +57,7 @@ async function pollProvider(
   store: Store,
   notifier: Notifier,
   summary: RunSummary,
+  fetchComments = true,
 ): Promise<{ hasItems: boolean }> {
   const log = logger.child({ provider: provider.key });
 
@@ -73,9 +74,20 @@ async function pollProvider(
     });
   }
 
-  // Priorität 2: Kommentare zu den jüngsten bekannten Posts.
-  const recentPosts = store.getRecentPosts(provider.key);
-  const comments = await provider.fetchComments(recentPosts);
+  // Priorität 2: Kommentare zu den jüngsten bekannten Posts. Ein Fehler hier
+  // darf die bereits geholten Posts NICHT verschlucken (z. B. fehlende
+  // Kommentar-Berechtigung): erst alles versenden, dann den Fehler nachreichen,
+  // damit der HealthTracker ihn trotzdem sieht.
+  let comments: SocialEvent[] = [];
+  let commentError: unknown;
+  if (fetchComments) {
+    try {
+      comments = await provider.fetchComments(store.getRecentPosts(provider.key));
+    } catch (err) {
+      commentError = err;
+      log.error({ err }, "Kommentar-Abruf fehlgeschlagen — Posts werden trotzdem verschickt");
+    }
+  }
   const events: SocialEvent[] = [...posts, ...comments];
 
   // Erstlauf: Bestand still als gesehen markieren, nichts senden.
@@ -86,6 +98,7 @@ async function pollProvider(
     }
     store.markBootstrapped(provider.key);
     log.info({ seeded: events.length }, "Erstlauf: Bestand still eingelesen, nichts gesendet");
+    if (commentError) throw commentError;
     return { hasItems: events.length > 0 };
   }
 
@@ -101,6 +114,10 @@ async function pollProvider(
       log.error({ err, externalId: event.externalId }, "Senden fehlgeschlagen");
     }
   }
+
+  // Posts sind raus — jetzt darf der Kommentar-Fehler den Lauf als
+  // fehlgeschlagen markieren (Ops-Karte via HealthTracker).
+  if (commentError) throw commentError;
 
   return { hasItems: events.length > 0 };
 }
@@ -197,7 +214,7 @@ export async function runOnce(platforms: PlatformConfig[], deps: PollerDeps): Pr
   const results = await Promise.allSettled(
     active.map(async (cfg) => {
       const provider = providerFactory(cfg, logger);
-      return pollProvider(provider, store, notifier, summary);
+      return pollProvider(provider, store, notifier, summary, cfg.comments);
     }),
   );
 

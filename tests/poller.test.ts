@@ -20,6 +20,7 @@ function cfg(overrides: Partial<PlatformConfig> = {}): PlatformConfig {
     platform: "linkedin",
     name: "Raptus AG (LinkedIn)",
     enabled: true,
+    comments: true,
     options: {},
     ...overrides,
   };
@@ -51,6 +52,8 @@ class FakeProvider implements SocialProvider {
   posts: SocialEvent[] = [];
   comments: SocialEvent[] = [];
   failWith: Error | null = null;
+  failCommentsWith: Error | null = null;
+  commentCalls = 0;
   lastCommentInput: PostRef[] | null = null;
 
   constructor(key: string) {
@@ -63,7 +66,9 @@ class FakeProvider implements SocialProvider {
   }
 
   async fetchComments(posts: PostRef[]): Promise<SocialEvent[]> {
+    this.commentCalls++;
     this.lastCommentInput = posts;
+    if (this.failCommentsWith) throw this.failCommentsWith;
     return this.comments;
   }
 }
@@ -196,6 +201,41 @@ describe("runOnce", () => {
     const tokenOps = notifier.ops.filter((o) => o.kind === "tokenExpiry");
     expect(tokenOps).toHaveLength(1);
     expect(tokenOps[0].daysLeft).toBeLessThanOrEqual(7);
+    store.close();
+  });
+
+  it("verschickt Posts auch dann, wenn der Kommentar-Abruf scheitert", async () => {
+    const provider = new FakeProvider("raptus-linkedin");
+    const { store, notifier, run } = setup(provider);
+    await run(); // Bootstrap
+
+    // Kommentar-Berechtigung fehlt (LinkedIn ohne Partnerfreigabe: 403).
+    provider.posts = [postEvent("p1")];
+    provider.failCommentsWith = new Error("LinkedIn comments: HTTP 403 — Partnerfreigabe nötig");
+
+    const summary = await run();
+    // Post ist raus …
+    expect(notifier.sent.map((e) => e.externalId)).toEqual(["p1"]);
+    expect(store.hasSeen("raptus-linkedin", "p1")).toBe(true);
+    // … und der Fehler wurde trotzdem als Provider-Ausfall gemeldet.
+    expect(summary.providersFailed).toBe(1);
+    expect(notifier.ops.some((o) => o.kind === "down")).toBe(true);
+    store.close();
+  });
+
+  it("überspringt den Kommentar-Abruf bei comments: false", async () => {
+    const provider = new FakeProvider("raptus-linkedin");
+    provider.failCommentsWith = new Error("dürfte nie aufgerufen werden");
+    const { store, notifier, run } = setup(provider);
+    const platforms = [cfg({ key: provider.key, comments: false })];
+
+    await run(platforms); // Bootstrap
+    provider.posts = [postEvent("p1")];
+    const summary = await run(platforms);
+
+    expect(provider.commentCalls).toBe(0);
+    expect(notifier.sent.map((e) => e.externalId)).toEqual(["p1"]);
+    expect(summary.providersFailed).toBe(0);
     store.close();
   });
 

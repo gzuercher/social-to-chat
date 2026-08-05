@@ -89,6 +89,9 @@ steht *„Konfiguration gültig"*.
   erstellten *System-User-Token* einfügen → der Assistent findet die
   Firmen-Seite und das Instagram-Konto selbst → auswählen → Speichern.
   Dieser Schlüssel **läuft nie ab** — einmal einrichten, nie wieder.
+  *(Findet der Assistent keine Seite, fehlt beim Token ein Häkchen oder dem
+  Systemnutzer die Seiten-Zuweisung — die Meldung sagt es, Details für die
+  IT in [TOKENS.md](TOKENS.md).)*
 - **TikTok**: Seite „TikTok" → drei Werte einfügen (kommen von der IT aus
   dem TikTok-Developer-Portal) → der Assistent prüft sie sofort → Speichern.
 

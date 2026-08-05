@@ -30,7 +30,7 @@ Ein Digest (Zusammenfassung) ist als späteres Feature vorgesehen.
 
 | Plattform | Neue Posts | Kommentare | Statistiken | API |
 |---|:---:|:---:|:---:|---|
-| LinkedIn | ✅ | ✅ | ✅ | Community Management / Marketing API (`r_organization_social`) |
+| LinkedIn | ✅ | ⚠️ | ✅ | Posts: `r_organization_social`. **Kommentare nur mit Community-Management-Partnerfreigabe** (sonst 403), s. [TOKENS.md](docs/TOKENS.md) |
 | Facebook (Page) | ✅ | ✅ | ✅ | Meta Graph API |
 | Instagram | ✅ | ✅ | ✅ | Meta Graph API — **IG-Business-Konto, mit FB-Page verknüpft** |
 | **TikTok** | ✅ | ❌ | ✅ | Display/Business API — **keine Kommentar-Lese-API** |

@@ -25,6 +25,10 @@ platforms:
     # OHNE Auto-Refresh: Ablaufdatum des Tokens pflegen (ISO-Datum), der
     # Poller warnt bei T-14/T-7/T-1 per Ops-Karte. MIT refresh-Block weglassen.
     # tokenExpiresAt: "2026-09-01"
+    # Kommentare (Priorität 2) abschalten, wenn die Plattform sie nicht
+    # freigibt — bei LinkedIn ohne Community-Management-Partnerfreigabe
+    # antwortet der socialActions-Endpunkt mit 403. Posts laufen weiter.
+    # comments: false
     options:
       organizationUrn: "urn:li:organization:XXXXXXXX"
       tokenEnv: "LINKEDIN_ACCESS_TOKEN"

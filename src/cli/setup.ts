@@ -283,9 +283,16 @@ function metaFormPage(msg?: string): string {
 ${msg ? `<p class="err">${esc(msg)}</p>` : ""}
 <p>Meta bietet keinen Refresh-Flow — der Weg zu „nie wieder anfassen" ist ein
 <b>System-User-Token</b> (Business Manager → System User → Assets zuweisen →
-Token generieren, „Never expires", Scopes: <code>pages_read_engagement</code>,
-<code>pages_read_user_content</code>, <code>instagram_basic</code>,
-<code>instagram_manage_comments</code>). Schritt-für-Schritt: docs/TOKENS.md.</p>
+Token generieren, „Never expires"). Schritt-für-Schritt: docs/TOKENS.md.</p>
+<p>Diese <b>sechs Scopes</b> beim Generieren ankreuzen:</p>
+<ul>
+<li><code>pages_show_list</code> — ohne diesen findet der Wizard unten keine Seite</li>
+<li><code>business_management</code> — Zugriff auf die Assets des Business-Portfolios</li>
+<li><code>pages_read_engagement</code> — Beiträge der Seite lesen</li>
+<li><code>pages_read_user_content</code> — Kommentare anderer Personen lesen</li>
+<li><code>instagram_basic</code> — Instagram-Beiträge lesen</li>
+<li><code>instagram_manage_comments</code> — Instagram-Kommentare lesen</li>
+</ul>
 <p>Token unten einfügen — der Wizard validiert ihn und findet Page-ID und
 IG-Business-Konto automatisch.</p>
 <form method="post" action="/meta/pages">
@@ -505,7 +512,11 @@ async function handle(req: IncomingMessage, res: ServerResponse): Promise<void> 
       if (pages.length === 0) {
         return send(
           res,
-          metaFormPage("Token gültig, aber keine Pages gefunden — Asset-Zuweisung prüfen."),
+          metaFormPage(
+            "Token gültig, aber keine Seite gefunden. Zwei häufige Ursachen: " +
+              "(1) der Scope pages_show_list bzw. business_management fehlt beim Token, " +
+              "(2) dem System-User ist die Facebook-Seite nicht als Asset zugewiesen.",
+          ),
         );
       }
       const nonce = randomBytes(8).toString("hex");

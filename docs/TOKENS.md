@@ -45,6 +45,15 @@ Zustand inkl. rotierter Refresh-Tokens liegt in der SQLite-Metadata und
 
 ## LinkedIn
 
+> **Kommentare brauchen eine Partnerfreigabe (Stand 2026-07, live verifiziert):**
+> Beiträge liefert die API mit `r_organization_social` problemlos. Der
+> Kommentar-Endpunkt (`/rest/socialActions/…`) gehört dagegen zum
+> **Community Management API**-Partnerprogramm und antwortet ohne Freigabe mit
+> `403 ACCESS_DENIED · partnerApiSocialActions`. Bis zur Freigabe in der
+> `platforms.yaml` `comments: false` setzen — dann laufen die Posts weiter,
+> ohne dass der Adapter jeden Zyklus scheitert. Freigabe beantragen:
+> LinkedIn Developer Portal → Products → *Community Management API*.
+
 **Einmalig (Mensch):**
 1. In der LinkedIn-App („SoloPostics", Client `78s5jdboo592ss`) sicherstellen,
    dass „Refresh Tokens" verfügbar sind (Community-Management-/Marketing-
@@ -61,6 +70,11 @@ Zustand inkl. rotierter Refresh-Tokens liegt in der SQLite-Metadata und
 **Danach automatisch:** Der Poller erneuert den Access-Token, sobald weniger
 als 7 Tage Restlaufzeit bleiben. Liefert LinkedIn ein rotiertes Refresh-Token,
 wird es übernommen.
+
+**API-Version:** LinkedIn-Versionen (`LinkedIn-Version: YYYYMM`) sind nur rund
+12 Monate aktiv. Der Adapter nutzt deshalb automatisch den **Vormonat** —
+keine Pflege nötig. Nur wenn eine bestimmte Version gebraucht wird:
+`options.apiVersion: "202606"`.
 
 **Verbleibende menschliche Pflicht:** Der Refresh-Token selbst läuft nach
 spätestens 365 Tagen ab und kann **nicht** programmatisch verlängert werden —
@@ -97,12 +111,24 @@ Schritten ist ein anderer:
    Token-generieren-Dialog. Die App braucht keine öffentliche Freigabe
    (interner Business-Use-Case).
 2. Im Meta Business Manager einen **System User** (Typ Admin oder Employee)
-   anlegen.
-3. Dem System User die Assets zuweisen: die **App** aus Schritt 1 sowie die
-   Page (und das verknüpfte IG-Business-Konto).
-4. Token generieren (App aus Schritt 1 auswählen) mit Scopes
-   `pages_read_engagement`, `pages_read_user_content`, `instagram_basic`,
-   `instagram_manage_comments` — **ohne Ablauf** („Never expires" wählen).
+   anlegen (Einstellungen → Nutzer → Systemnutzer). Meta erlaubt nur
+   eingeschränkte Namen (keine Leer-/Sonderzeichen), z. B.
+   `SocialChatinternal` — der Name ist rein kosmetisch.
+3. Dem System User die **Assets zuweisen** (Button „Assets zuweisen" bzw. bei
+   der App „Personen zuweisen"): Facebook-**Seite** und das verknüpfte
+   **IG-Business-Konto**. Die App muss nicht separat verknüpft werden — sie
+   wird im Token-Dialog ausgewählt, das genügt.
+4. Beim System User **„Neues Token generieren"** → App aus Schritt 1 wählen →
+   Ablauf **„Läuft nie ab"** → diese sechs Scopes ankreuzen:
+
+   | Scope | Wofür |
+   |---|---|
+   | `pages_show_list` | **Seiten auflisten** — ohne ihn findet der Wizard nichts (`/me/accounts`) |
+   | `business_management` | Zugriff auf die Assets des Business-Portfolios |
+   | `pages_read_engagement` | Beiträge der Seite lesen (`/{page-id}/published_posts`) |
+   | `pages_read_user_content` | Kommentare fremder Personen lesen (`/{post-id}/comments`) |
+   | `instagram_basic` | Instagram-Beiträge lesen (`/{ig-user-id}/media`) |
+   | `instagram_manage_comments` | Instagram-Kommentare lesen (`/{media-id}/comments`) |
 5. Den Token im Setup-Wizard (Seite „Facebook/Instagram") einfügen — er
    validiert ihn und findet Page-ID/IG-ID selbst. (Manuell: in `.env` als
    `FACEBOOK_PAGE_TOKEN` / `INSTAGRAM_ACCESS_TOKEN`.) Kein `tokenExpiresAt`,

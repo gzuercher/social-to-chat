@@ -209,7 +209,9 @@ describe("formatDuration", () => {
   });
 
   it("renders days for long durations", () => {
-    expect(formatDuration(24 * 60 * 60_000)).toBe("1 day");
-    expect(formatDuration(7 * 24 * 60 * 60_000)).toBe("7 days");
+    // Sprachneutral: das Label wird in lokalisierte (deutsche) Sätze
+    // eingesetzt — „7 days" mitten im Satz wäre falsch.
+    expect(formatDuration(24 * 60 * 60_000)).toBe("1d");
+    expect(formatDuration(7 * 24 * 60 * 60_000)).toBe("7d");
   });
 });

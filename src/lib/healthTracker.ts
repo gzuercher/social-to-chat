@@ -1,8 +1,16 @@
 /**
  * GESPIEGELTES MODUL (Familienstandard mit status-page-to-chat).
  * Änderungen hier bitte im Schwester-Repo nachziehen.
- * (Einziger bewusster Unterschied: `hasItems` heißt im Schwester-Repo
+ * (Erster bewusster Unterschied: `hasItems` heißt im Schwester-Repo
  * historisch `hasIncidents` — gleiche Semantik: „Adapter hat je Daten geliefert".)
+ *
+ * Zweiter bewusster Unterschied: status-page-to-chat kennt zusätzlich
+ * `configDrift` und meldet half-dead nur noch auf dieses Verdikt. Hier
+ * bleibt es beim Item-Kriterium — es gibt keine Filterkonfiguration, die
+ * stale werden könnte, und fetchPosts() liefert das Sichtfenster, also
+ * bei gesunder Konfiguration praktisch immer Items.
+ * (Ebenfalls nicht gespiegelt: das dortige optionale `logoUrl` — der
+ * OpsEvent-Contract hier kennt kein Logo-Feld.)
  *
  * In-memory health tracker for poll adapters.
  *
@@ -277,14 +285,18 @@ export class HealthTracker {
 
 /**
  * Formats an elapsed millisecond value as a short human label, e.g.
- * "2h 15min", "30min", "7 days".
+ * "2h 15min", "30min", "7d".
+ *
+ * Deliberately language-neutral: the label is substituted into sentences
+ * that are themselves localised, so a spelled-out "7 days" would read as
+ * English inside a German sentence.
  */
 export function formatDuration(ms: number): string {
   if (ms < 60_000) return "<1min";
   const totalMinutes = Math.floor(ms / 60_000);
   const days = Math.floor(totalMinutes / (60 * 24));
   if (days >= 1) {
-    return days === 1 ? "1 day" : `${days} days`;
+    return `${days}d`;
   }
   const hours = Math.floor(totalMinutes / 60);
   const minutes = totalMinutes % 60;

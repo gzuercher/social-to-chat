@@ -84,7 +84,11 @@ App-Kontext für den System-User-Token (Meta vergibt Tokens nur app-gebunden).
    `linkedin.ts`-Header) und die Autor-URN-Darstellung.
 2. Token-Einrichtung je Plattform (einmalige menschliche Schritte, docs/TOKENS.md):
    LinkedIn/TikTok OAuth-Consent für den Auto-Refresh, Meta System-User-Token.
-3. Stats (P3): erst Contract mit der Logic App designen, dann eigener seltener Job.
+3. **Erinnerungs-Mail** für manuelle Erneuerungen (Guys ausdrückliche Anforderung:
+   Kalendereintrag von Hand ist keine Lösung). Die Ops-Events `kind:"tokenExpiry"`
+   existieren; der Mailversand gehört in die Logic App `social-feed`
+   (`raptus-integration-router`, Office-365-Connector) — kein SMTP im Poller.
+4. Stats (P3): erst Contract mit der Logic App designen, dann eigener seltener Job.
 
 Spiegel-Hinweis für status-page-to-chat: `httpClient.httpPost` akzeptiert jetzt
 auch String-Payloads (form-encodierte Bodies, für OAuth) — beim nächsten

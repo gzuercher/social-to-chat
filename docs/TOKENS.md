@@ -51,8 +51,31 @@ Zustand inkl. rotierter Refresh-Tokens liegt in der SQLite-Metadata und
 > **Community Management API**-Partnerprogramm und antwortet ohne Freigabe mit
 > `403 ACCESS_DENIED · partnerApiSocialActions`. Bis zur Freigabe in der
 > `platforms.yaml` `comments: false` setzen — dann laufen die Posts weiter,
-> ohne dass der Adapter jeden Zyklus scheitert. Freigabe beantragen:
-> LinkedIn Developer Portal → Products → *Community Management API*.
+> ohne dass der Adapter jeden Zyklus scheitert.
+>
+> **Freigabe beantragen** (self-serve, kein Vertriebskontakt nötig — die
+> Community Management API ist „available to all approved developers"):
+> LinkedIn Developer Portal → App → *Products* → *Community Management API*
+> → *Request access*. Voraussetzungen: die App muss mit der **LinkedIn-Company-
+> Page der Raptus AG** verknüpft sein und der Antragsteller dort Administrator
+> sein. LinkedIn generiert automatisch einen Fragebogen (Use-Case,
+> Zielgruppe, Datenverwendung), der **innerhalb von 21 Tagen** ausgefüllt
+> werden muss. Ergebnis ist der **Development Tier** — er genügt für den
+> eigenen Auftritt, bringt aber ein hartes Limit mit (s. u.). Der
+> *Standard Tier* (kein Limit) ist ein separater Antrag inkl. Screen-Recording
+> und Technical Sign-Off — für den Eigengebrauch nicht nötig.
+>
+> **Achtung Development-Tier-Quota: 500 API-Calls pro App und 24 h.** Der
+> Poller verbraucht mit 5-Minuten-Takt allein für Posts 288 Calls/Tag; ein
+> Kommentar-Request **pro Post und Zyklus** (bis zu 25 Posts im 30-Tage-
+> Fenster) wären mehrere Tausend. Vor dem Einschalten von `comments: true`
+> muss der Kommentar-Abruf also gedrosselt werden (eigenes, selteneres
+> Intervall + weniger Posts je Lauf). Ebenfalls im Dev Tier deaktiviert:
+> Webhooks/Push für Social Actions.
+>
+> Mit der Freigabe kommt der Scope `r_organization_social_feed` dazu — der
+> OAuth-Consent muss danach **einmal neu durchlaufen** werden (Wizard),
+> sonst hat der bestehende Token die neue Berechtigung nicht.
 
 **Einmalig (Mensch):**
 1. In der LinkedIn-App („SoloPostics", Client `78s5jdboo592ss`) sicherstellen,

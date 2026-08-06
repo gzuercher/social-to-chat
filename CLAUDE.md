@@ -64,20 +64,28 @@ Meta-Seite: Im Business-Portfolio der Raptus AG existiert die interne App
 **„Social-to-Chat-Internal"** (App-ID 1591886198962675) — sie ist der
 App-Kontext für den System-User-Token (Meta vergibt Tokens nur app-gebunden).
 
-## Live-Stand (2026-07-19)
+## Live-Stand (2026-08-06)
 - **LinkedIn Posts: verifiziert ✅** (Org `urn:li:organization:2127937`, Feld-Mapping
   id/commentary/publishedAt bestätigt). Läuft produktiv im Stack
   `/opt/stacks/raptus-social-notifs` (Container `raptus-social-notifs`).
-- **LinkedIn Kommentare: blockiert ⚠️** — `/rest/socialActions/…` gehört zum
-  Community-Management-**Partnerprogramm**, ohne Freigabe `403
-  partnerApiSocialActions`. Deshalb `comments: false` in der Live-Config.
+  **Der Server ist die lokale Maschine dieser Session — kein SSH nötig**,
+  `docker exec raptus-social-notifs …` genügt.
+- **LinkedIn Auto-Refresh: verifiziert ✅** — Metadata `oauthToken:raptus-linkedin`
+  enthält einen selbst geholten Access-Token (≠ Seed aus der `.env`),
+  Access bis 2026-09-20, Refresh bis **2027-07-19** (dann Re-Consent).
+  LinkedIn ist damit abgeschlossen; die App heisst **„Social-Feed"**.
+- **LinkedIn Kommentare: aufgegeben ⚠️** — `/rest/socialActions/…` braucht die
+  Community Management API (`403 partnerApiSocialActions`). Bewusst **nicht**
+  beantragt: nur für kommerzielle Use-Cases, eine Ablehnung verbrennt die App
+  (kein erneuter Antrag mit derselben App), und Dev-Tier hat 500 Calls/24 h.
+  Begründung: docs/TOKENS.md. `comments: false` bleibt.
 - **API-Version**: nicht mehr gepinnt — Default ist der Vormonat
   (`defaultApiVersion()`), sonst bricht der Adapter jährlich mit `426`.
 - Meta/TikTok: Tokens noch nicht eingerichtet.
 
 ## Nächste Schritte
 1. **Live-Verifikation der Adapter** mit echten Tokens/IDs, in dieser Reihenfolge:
-   LinkedIn (Token vorhanden: `r_organization_social`, App „SoloPostics",
+   LinkedIn (Token vorhanden: `r_organization_social`, App „Social-Feed",
    Client `78s5jdboo592ss`; 60-Tage-Token → `tokenExpiresAt` pflegen!), dann
    Facebook, Instagram (IG-Business-Konto mit FB-Page verknüpfen!). Besonders
    prüfen: Feldnamen der LinkedIn-Kommentare (defensiv gemappt, siehe

@@ -53,32 +53,38 @@ Zustand inkl. rotierter Refresh-Tokens liegt in der SQLite-Metadata und
 > `platforms.yaml` `comments: false` setzen — dann laufen die Posts weiter,
 > ohne dass der Adapter jeden Zyklus scheitert.
 >
-> **Freigabe beantragen** (self-serve, kein Vertriebskontakt nötig — die
-> Community Management API ist „available to all approved developers"):
-> LinkedIn Developer Portal → App → *Products* → *Community Management API*
-> → *Request access*. Voraussetzungen: die App muss mit der **LinkedIn-Company-
-> Page der Raptus AG** verknüpft sein und der Antragsteller dort Administrator
-> sein. LinkedIn generiert automatisch einen Fragebogen (Use-Case,
-> Zielgruppe, Datenverwendung), der **innerhalb von 21 Tagen** ausgefüllt
-> werden muss. Ergebnis ist der **Development Tier** — er genügt für den
-> eigenen Auftritt, bringt aber ein hartes Limit mit (s. u.). Der
-> *Standard Tier* (kein Limit) ist ein separater Antrag inkl. Screen-Recording
-> und Technical Sign-Off — für den Eigengebrauch nicht nötig.
+> **Empfehlung (Stand 2026-08): nicht beantragen, `comments: false` lassen.**
+> Der Antrag ist nominell self-serve (Developer Portal → App *Social-Feed* →
+> *Products* → *Community Management API* → *Request access*), praktisch aber
+> ein schlechter Deal für diesen Anwendungsfall:
 >
-> **Achtung Development-Tier-Quota: 500 API-Calls pro App und 24 h.** Der
-> Poller verbraucht mit 5-Minuten-Takt allein für Posts 288 Calls/Tag; ein
-> Kommentar-Request **pro Post und Zyklus** (bis zu 25 Posts im 30-Tage-
-> Fenster) wären mehrere Tausend. Vor dem Einschalten von `comments: true`
-> muss der Kommentar-Abruf also gedrosselt werden (eigenes, selteneres
-> Intervall + weniger Posts je Lauf). Ebenfalls im Dev Tier deaktiviert:
-> Webhooks/Push für Social Actions.
+> - Die Community Management APIs sind laut LinkedIn *„only available to
+>   registered legal organizations for **commercial use cases** only"*. Ein
+>   interner Teams-Benachrichtiger ist kein kommerzieller Use-Case — das ist
+>   der wahrscheinlichste Ablehnungsgrund.
+> - **Eine Ablehnung verbrennt die App:** „You won't be able to re-apply for
+>   Development tier access with your existing app." Ein neuer Antrag
+>   erfordert eine **neue App** — also neue Client-ID/Secret, neuer
+>   OAuth-Consent, und das produktiv laufende Post-Polling müsste umgezogen
+>   werden.
+> - Selbst bei Zusage: **Development Tier = 500 API-Calls pro App und 24 h.**
+>   Der Poller verbraucht mit 5-Minuten-Takt allein für Posts 288 Calls/Tag;
+>   ein Kommentar-Request pro Post und Zyklus (bis zu 25 Posts im 30-Tage-
+>   Fenster) wären mehrere Tausend. `comments: true` würde also erst nach
+>   einer Drosselung funktionieren (eigenes, selteneres Intervall +
+>   Post-Budget). Ebenfalls im Dev Tier deaktiviert: Webhooks/Push für
+>   Social Actions.
+> - Mit der Freigabe käme der Scope `r_organization_social_feed` dazu — der
+>   OAuth-Consent müsste danach einmal neu durch den Wizard.
 >
-> Mit der Freigabe kommt der Scope `r_organization_social_feed` dazu — der
-> OAuth-Consent muss danach **einmal neu durchlaufen** werden (Wizard),
-> sonst hat der bestehende Token die neue Berechtigung nicht.
+> Voraussetzungen wären erfüllt (App mit der verifizierten Raptus-AG-Page
+> verknüpft, Privacy-Policy-URL gesetzt). Wenn der Button im Portal
+> **ausgegraut** ist, liegt es nicht an einer fehlenden Einstellung im Repo —
+> dann hilft nur ein Ticket im
+> [Developer Support Portal](https://www.linkedin.com/help/linkedin/ask/dsapi).
 
 **Einmalig (Mensch):**
-1. In der LinkedIn-App („SoloPostics", Client `78s5jdboo592ss`) sicherstellen,
+1. In der LinkedIn-App („Social-Feed", Client `78s5jdboo592ss`) sicherstellen,
    dass „Refresh Tokens" verfügbar sind (Community-Management-/Marketing-
    Freigabe der App).
 2. OAuth-Authorization-Code-Flow einmal durchlaufen (Scope

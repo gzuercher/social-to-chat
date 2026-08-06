@@ -9,7 +9,7 @@ import type { PostRef, SocialEvent, SocialProvider, SocialStats } from "./types.
  * LinkedIn-Adapter (Organisation/Company Page).
  *
  * API: LinkedIn REST-API (versioniert). Scope: `r_organization_social`
- * (App "SoloPostics", Client 78s5jdboo592ss). Access-Token 60 Tage →
+ * (App "Social-Feed", Client 78s5jdboo592ss). Access-Token 60 Tage →
  * Auto-Refresh via lib/tokenRefresh.ts.
  *
  * Endpunkte:

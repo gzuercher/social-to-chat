@@ -159,9 +159,6 @@ selbst als Karte in den Chat.
       E-Mail gehört in die Logic App `social-feed`
       (`raptus-integration-router`), damit keine SMTP-Secrets in den Container
       wandern. Eine Chat-Karte allein reicht als Frist-Erinnerung nicht.
-- [ ] Kommentar-Abruf drosseln (eigenes Intervall / Post-Budget) — Voraussetzung
-      für `comments: true` unter der LinkedIn-Development-Tier-Quota
-      (500 Calls/24 h), siehe [TOKENS.md](docs/TOKENS.md)
 - [ ] Stats-Contract designen (Priorität 3, mit raptus-integration-router)
 - [ ] Digest / periodische Zusammenfassung
 - [ ] GHCR-Image-Publish-Workflow (analog status-page-to-chat)

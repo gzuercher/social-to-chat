@@ -70,6 +70,8 @@ App-Kontext für den System-User-Token (Meta vergibt Tokens nur app-gebunden).
   `/opt/stacks/raptus-social-notifs` (Container `raptus-social-notifs`).
   **Der Server ist die lokale Maschine dieser Session — kein SSH nötig**,
   `docker exec raptus-social-notifs …` genügt.
+  Image: lokal gebaut (`social-to-chat:local`, keine Registry) — Update- und
+  Rückfall-Ablauf: README, Abschnitt „Produktiv-Image".
 - **LinkedIn Auto-Refresh: verifiziert ✅** — Metadata `oauthToken:raptus-linkedin`
   enthält einen selbst geholten Access-Token (≠ Seed aus der `.env`),
   Access bis 2026-09-20, Refresh bis **2027-07-19** (dann Re-Consent).
@@ -84,14 +86,10 @@ App-Kontext für den System-User-Token (Meta vergibt Tokens nur app-gebunden).
 - Meta/TikTok: Tokens noch nicht eingerichtet.
 
 ## Nächste Schritte
-1. **Live-Verifikation der Adapter** mit echten Tokens/IDs, in dieser Reihenfolge:
-   LinkedIn (Token vorhanden: `r_organization_social`, App „Social-Feed",
-   Client `78s5jdboo592ss`; 60-Tage-Token → `tokenExpiresAt` pflegen!), dann
-   Facebook, Instagram (IG-Business-Konto mit FB-Page verknüpfen!). Besonders
-   prüfen: Feldnamen der LinkedIn-Kommentare (defensiv gemappt, siehe
-   `linkedin.ts`-Header) und die Autor-URN-Darstellung.
+1. **Live-Verifikation der Adapter** mit echten Tokens/IDs (LinkedIn ist erledigt):
+   Facebook, dann Instagram (IG-Business-Konto mit FB-Page verknüpfen!), dann TikTok.
 2. Token-Einrichtung je Plattform (einmalige menschliche Schritte, docs/TOKENS.md):
-   LinkedIn/TikTok OAuth-Consent für den Auto-Refresh, Meta System-User-Token.
+   Meta System-User-Token, TikTok OAuth-Consent für den Auto-Refresh.
 3. **Erinnerungs-Mail** für manuelle Erneuerungen (Guys ausdrückliche Anforderung:
    Kalendereintrag von Hand ist keine Lösung). Die Ops-Events `kind:"tokenExpiry"`
    existieren; der Mailversand gehört in die Logic App `social-feed`

@@ -27,3 +27,8 @@ updates:
     schedule:
       interval: "weekly"
     open-pull-requests-limit: 5
+    ignore:
+      # Node-Hauptversion bewusst von Hand wechseln (nur LTS, engines in
+      # package.json mitziehen). Ungerade Versionen sind nie LTS.
+      - dependency-name: "node"
+        update-types: ["version-update:semver-major"]

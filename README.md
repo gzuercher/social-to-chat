@@ -7,7 +7,7 @@ eine Logic App, die daraus eine Microsoft-Teams-Karte rendert.
 
 Kein Drittanbieter-SaaS (kein MAKE/n8n): ein kleiner TypeScript/Node-Container,
 den man selbst betreibt. Schwester-Projekt von
-[status-page-to-chat](https://github.com/raptus-ag/status-page-to-chat).
+[status-page-to-chat](https://github.com/gzuercher/status-page-to-chat).
 
 > **Status:** Funktionsfähig, Live-Verifikation ausstehend. Poll-Loop,
 > Deduplizierung, Webhook-Versand, Selbstüberwachung (Health-/Token-Ops-Events
@@ -119,6 +119,26 @@ node dist/src/main.js setup      # geführte Token-Einrichtung (Web-UI, localhos
 node dist/src/main.js validate   # Config prüfen (Exit 0/1)
 node dist/src/main.js health     # HEALTHCHECK: letzter Lauf < 15 min?
 ```
+
+### Produktiv-Image
+
+Es gibt **kein Registry-Image** (kein ghcr-Push in der CI). Produktiv läuft das
+lokal gebaute Image `social-to-chat:local` im Stack
+`/opt/stacks/raptus-social-notifs` (Container `raptus-social-notifs`, Setup-
+Wizard `raptus-social-notifs-setup` nutzt dasselbe Image). Das sonntägliche
+`update-stacks.sh` überspringt lokale Images bewusst; Updates sind Handarbeit:
+
+```bash
+# im Repo, Stand main
+docker tag social-to-chat:local social-to-chat:vorher-$(date +%Y%m%d)   # Rückfall
+docker build -t social-to-chat:local .
+cd /opt/stacks/raptus-social-notifs && docker compose up -d raptus-social-notifs
+docker logs -f raptus-social-notifs                                      # ersten Lauf prüfen
+```
+
+Rückfall: `docker tag social-to-chat:vorher-<datum> social-to-chat:local`, dann
+erneut `docker compose up -d raptus-social-notifs`. Alte `vorher-*`-Tags von
+Hand aufräumen.
 
 Der Docker-`HEALTHCHECK` nutzt `health` automatisch; beim allerersten Lauf pro
 Plattform wird der Bestand **still eingelesen** (kein Post-Flood im Kanal).

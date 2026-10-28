@@ -43,7 +43,7 @@ const BACKOFF_FACTOR = 4;
 const BACKOFF_CAP_MS = 30_000;
 
 /** Repo-spezifisch (einziger erlaubter Unterschied zum Schwester-Repo). */
-const REPO_URL = "https://github.com/raptus-ag/social-to-chat";
+const REPO_URL = "https://github.com/gzuercher/social-to-chat";
 
 function getDefaultUserAgent(): string {
   if (process.env.USER_AGENT) return process.env.USER_AGENT;
